@@ -1,0 +1,23 @@
+Function of each Arduino pin for this project:
+
+0: Serial RX (unused)
+1: Serial TX (unused)
+2: User input switch
+3: DC motor A power pwm (high = full power)
+4: debug pin (unused in final design)
+5: linkage 1 servo signal
+6: linkage 2 servo signal
+7: Joystick button input
+8: DC motor B brake (high = brake)
+9: DC motor A brake (high = brake)
+10: Warning LED output
+11: DC motor B power pwm (high = full power)
+12: Servo power "direction" pin (high = forward)
+13: DC motor B direction pin (high = forward)
+
+A0: Servo current sensing
+A1: DC Motor current sensing
+A2: Servo motor voltage sensing
+A3: Joystick x axis
+A4: Joystick y axis
+A5: Potentiometer signal
