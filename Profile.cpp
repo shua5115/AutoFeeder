@@ -9,11 +9,11 @@
 Profile profiles[4];
 
 Profile plate_profile = {
-  -85, -155,  // start
+  -80, -155,  // start
   -76, -175,  // bottom
-  0, -175,    // middle
-  76, -175,   // front
-  85, -155    // end
+  0, -177.5,    // middle
+  76, -180,   // front
+  80, -155    // end
 };
 
 Profile bowl_profile = {
