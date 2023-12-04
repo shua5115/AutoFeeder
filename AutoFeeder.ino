@@ -35,7 +35,7 @@ const float L2 = 100.0;
 // Servos "normally" draw 0.2 amps. Drawing 0.5 amps is usually when they are stuck on something.
 // The current values below are actually analogRead values.
 #define THRESHOLD_CURRENT 100  // This is deliberately above actual idle current. Setting this too low will result in speed reduction too early.
-#define OVERLOAD_CURRENT 256
+#define OVERLOAD_CURRENT 269
 #define SPEED_REDUCTION_STRENGTH 0.0295203217051  // Calculated as ln(0.01)/(threshold-overload), so speed is 100x slower at overload. See https://www.desmos.com/calculator/5mldupvozq
 // Battery voltage sensing
 #define LOW_POWER_VOLTAGE 522  // Calculated as half of 5.1 volts mapped from (0-5) -> (0-1023). If the voltage divider circuit measures below this value, then the device will shut off.

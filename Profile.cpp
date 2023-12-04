@@ -71,7 +71,7 @@ bool get_profile_step(const Profile &p, int step, float &x_addr, float &y_addr) 
       if (p.end_y < -(L1 + 50)) {
         y_addr = p.end_y + 15;
       } else {
-        y_addr = p.end_y + 30;
+        y_addr = p.end_y + 25;
       }
       return true;
     default:
