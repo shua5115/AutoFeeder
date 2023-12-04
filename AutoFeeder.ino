@@ -13,51 +13,49 @@
 #define WARNING_LED_PIN 10
 // Analog Pins
 #define PROFILE_POT_PIN 5
+#define SERVO_VOLTAGE_PIN 4
 
-// Lengths of linkages
+// Lengths of linkages, in mm
 const float L1 = 100.0;
 const float L2 = 100.0;
 
 // Constants
-#define Q_EPSILON 0.000001
-#define DIST_EPSILON 0.00001
-#define LONG_PRESS_MILLIS 1000
+#define Q_EPSILON 0.00001   // Two angles are considered equal if their absolute difference is less than this value
+#define DIST_EPSILON 0.001  // Two points are considered at the same position if they are this close
 // If servos are not moving from 0 to 180 degrees, then change these values
 #define SERVO_MIN_PW 544
 #define SERVO_MAX_PW 2400
 // Units in radians/step (timestep dependent on code performance)
-#define MAX_JOINT_SPEED 0.00025
-#define DC_MOTOR_SPEED 96
+#define MAX_JOINT_SPEED 0.00025  // In radians per step
+#define DC_MOTOR_SPEED 96        // From 0-255, an analogWrite value
 // Units in mm/step
 #define IK_STEP_SIZE 0.25
-// End location of scoop
-#define FINAL_X (L1 + L2)
-#define FINAL_Y 0.0
 // Current sensing
 // Linearly maps from 0-3.3 volts -> 0-2 amps
 // Servos "normally" draw 0.2 amps. Drawing 0.5 amps is usually when they are stuck on something.
+// The current values below are actually analogRead values.
 #define THRESHOLD_CURRENT 100  // This is deliberately above actual idle current. Setting this too low will result in speed reduction too early.
 #define OVERLOAD_CURRENT 256
-#define SPEED_REDUCTION_STRENGTH 0.0295203217051  // Calculated as ln(0.01)/(threshold-overload), speed is 100x slower at overload. See https://www.desmos.com/calculator/5mldupvozq
+#define SPEED_REDUCTION_STRENGTH 0.0295203217051  // Calculated as ln(0.01)/(threshold-overload), so speed is 100x slower at overload. See https://www.desmos.com/calculator/5mldupvozq
 // Battery voltage sensing
-#define LOW_POWER_VOLTAGE 522 // Calculated as half of 5.1 volts mapped from (0-5) -> (0-1023). If the voltage divider circuit measures below this value, then the robot will shut off.
+#define LOW_POWER_VOLTAGE 522  // Calculated as half of 5.1 volts mapped from (0-5) -> (0-1023). If the voltage divider circuit measures below this value, then the device will shut off.
 
 // GLOBAL VARIABLES
-Profile profile = profiles[0];
-int profile_idx = 0;
-unsigned long timestamp;      // Keeps track of when states are entered
-Servo j1, j2;                 // Servo joints
-float q1 = 0;                 // current q1 position
-float q2 = 0;                 // current q2 position
-float q1_speed = 0;           // current q1 speed
-float q2_speed = 0;           // current q2 speed
-float fk_target_q1 = 0;       // target q1 position
-float fk_target_q2 = 0;       // target q2 position
-float ik_target_x = L1 + L2;  // target x
-float ik_target_y = 0;        // target y
-size_t fk_step = 0;           // keeps track of forward kinematics progress
-size_t ik_step = 0;           // keeps track of inverse kinematics progress
-uint8_t prev_profile_idx = 0;
+Profile profile = profiles[0];  // Stores the keypoints of the currently selected profile
+int profile_idx = 0;            // Stores the index of the selected profile in the list of profiles
+unsigned long timestamp;        // Keeps track of when states are entered
+Servo j1, j2;                   // Servo joints
+float q1 = 0;                   // current q1 position
+float q2 = 0;                   // current q2 position
+float q1_speed = 0;             // current q1 speed
+float q2_speed = 0;             // current q2 speed
+float fk_target_q1 = 0;         // target q1 position
+float fk_target_q2 = 0;         // target q2 position
+float ik_target_x = L1 + L2;    // target x
+float ik_target_y = 0;          // target y
+size_t fk_step = 0;             // keeps track of forward kinematics progress
+size_t ik_step = 0;             // keeps track of inverse kinematics progress
+uint8_t prev_profile_idx = 0;   // keeps track of the previous profile index to detect when the selection changes
 
 #pragma region Step Code
 /// Returns 1 if finished, 0 otherwise
@@ -86,6 +84,7 @@ int step_ik_target(float x_target, float y_target, float step_length) {
 
 /// Returns 1 if finished, 0 otherwise
 int step_joint_positions(float q1_target, float q2_target, float q1_max_step, float q2_max_step) {
+  // Step q1 towards q1_target by q1_max_step, and the same for q2. Both do not exceed target values.
   float q1_delta, q2_delta;
   bool q1_done = false, q2_done = false;
   // current position is stored in q1, q2
@@ -127,18 +126,23 @@ int step_joint_positions(float q1_target, float q2_target, float q1_max_step, fl
 }
 
 void balance_speed(float q1_target, float q2_target, float max_speed, float &q1_speed, float &q2_speed) {
-  // make both abs(delta)
+  // Finds speeds at which both q1 and q2 will reach their target at the same time.
+  // If one of the joint speeds is very close to 0, then both speeds are just set to the maximum.
+
+  // Make the target store the difference between the current and target (the delta), then make the value positive
   q1_target -= q1;
   if (q1_target < 0) q1_target = -q1_target;
   q2_target -= q2;
   if (q2_target < 0) q2_target = -q2_target;
 
+  // If either value is too small, just use max speed.
   if (q1_target < Q_EPSILON || q2_target < Q_EPSILON) {
     q1_speed = max_speed;
     q2_speed = max_speed;
     return;
   }
-
+  // Find which delta is larger and set that speed to maximum.
+  // Then, set the smaller delta's speed to the ratio of max_speed*big_delta/small_delta.
   if (q1_target > q2_target) {
     q1_speed = max_speed;
     q2_target /= q1_target;
@@ -191,7 +195,7 @@ void return_step();        // Moves arm back to starting position, then switches
 // CODE
 
 bool check_low_power() {
-  int val = analogRead(4);
+  int val = analogRead(SERVO_VOLTAGE_PIN);
   if (val < LOW_POWER_VOLTAGE) {
     switch_mode(low_power_mode);
     return true;
@@ -202,34 +206,34 @@ bool check_low_power() {
 void setup() {
   pinMode(DEBUG_PIN, OUTPUT);                  // For oscilloscope debugging
   pinMode(INPUT_PIN, INPUT_PULLUP);            // Button input for scooping
-  pinMode(JOYSTICK_BUTTON_PIN, INPUT_PULLUP);  // Used for entering calibration
+  pinMode(JOYSTICK_BUTTON_PIN, INPUT_PULLUP);  // Used for calibration
   pinMode(SERVO_POWER_DIR, OUTPUT);            // Motor direction A -> positive voltage for servos
   digitalWrite(SERVO_POWER_DIR, HIGH);
   pinMode(SERVO_POWER_PWM, OUTPUT);    // Motor enable A -> power for servos
   digitalWrite(SERVO_POWER_PWM, LOW);  // Disable servos during initialization
   pinMode(WARNING_LED_PIN, OUTPUT);
   digitalWrite(WARNING_LED_PIN, LOW);
-  // Attach servos
+  // Attach all motors
   j1.attach(5);
   j2.attach(6);
   DCMotor::attach();  // Sets pins 8, 11, 13 for Motor B brake, enable, and direction
   DCMotor::set_brake(false);
   DCMotor::set_direction(false);
-  cur_mode = lift_step_fk;  // Start the robot by lifting to the zero position
+  cur_mode = lift_step_fk;  // Start the robot by moving to the zero position
   pre = true;
-  // Load custom profiles
+  // Load profiles from EEPROM
   for (int i = 0; i < NUM_PROFILES; i++) {
     load_profile(i, profiles[i]);
   }
   profile = profiles[0];
   // When the servos turn on, they snap to their start position at full speed
   // So, this position is one that is unlikely to hit an obstacle.
-  write_servos(-2.09, 2.09); // This is -120 and 120 degrees, making an equilateral triangle.
+  write_servos(-2.09, 2.09);            // This is -120 and 120 degrees, making an equilateral triangle.
   digitalWrite(SERVO_POWER_PWM, HIGH);  // Enable servos after setting targets to ensure servos recieve signal immediately
   timestamp = millis();
   // Give servos time to reach their target before starting the state machine
-  while(millis() < timestamp + 500) {
-    if(check_low_power()) {
+  while (millis() < timestamp + 500) {
+    if (check_low_power()) {
       break;
     }
   }
@@ -243,7 +247,8 @@ void loop() {
   }
   cur_mode();
   pre = false;
-  if((millis() % 100) == 0) {
+  // Every 0.1s, check if the profile choice has changed. If so, blink the LED.
+  if ((millis() % 100) == 0) {
     uint8_t val = check_profile_choice();
     if (val != prev_profile_idx) {
       prev_profile_idx = val;
@@ -293,7 +298,7 @@ int check_profile_choice() {
   // Average difference between division centers: 146
   // Center of profile 1: 476
   int val = analogRead(PROFILE_POT_PIN);
-  int idx = (val - (476 - 146/2)) / 146; // Subtract half a width to start at the "left" of profile 1 instead of the center.
+  int idx = (val - (476 - 146 / 2)) / 146;  // Subtract half a width to start at the "left" of profile 1 instead of the center.
   if (idx < 0) idx = 0;
   if (idx > 3) idx = 3;
   return idx;
@@ -340,13 +345,13 @@ void wait_mode() {
     timestamp = millis() - timestamp;
     if (timestamp >= 10000) {
       reset_profiles();
-      for(int i = 0; i < 4; i++) {
+      for (int i = 0; i < 4; i++) {
         digitalWrite(WARNING_LED_PIN, HIGH);
         delay(125);
         digitalWrite(WARNING_LED_PIN, LOW);
         delay(125);
       }
-      while(read_joystick_button()) {}
+      while (read_joystick_button()) {}
     } else if (timestamp > 1000) {
       switch_mode(calibration_mode);
     } else {
@@ -359,7 +364,7 @@ void wait_mode() {
 }
 
 void low_power_mode() {
-  if(pre) {
+  if (pre) {
     digitalWrite(SERVO_POWER_PWM, 0);
     DCMotor::set_speed(0);
   }
@@ -470,7 +475,7 @@ void feed_wait_step() {
 void return_step() {
   if (pre) {
     ik_target_x = profile.end_x;
-    ik_target_y = profile.end_y + 40.0;
+    ik_target_y = profile.end_y + 30.0; // Make sure to clear the bowl/plate
     calc_ik(ik_target_x, ik_target_y, fk_target_q1, fk_target_q2);
     balance_speed(fk_target_q1, fk_target_q2, MAX_JOINT_SPEED, q1_speed, q2_speed);
   }
@@ -505,7 +510,7 @@ void calibration_mode() {
     q2_speed = MAX_JOINT_SPEED;
     timestamp = millis();
     profile_index = check_profile_choice();
-    if (profile_index < 0 || profile_index > 3) {
+    if (profile_index < 0 || profile_index > (NUM_PROFILES-1)) {
       switch_mode(move_home_then_wait);
       return;
     }
@@ -530,10 +535,10 @@ void calibration_mode() {
   if (millis() - timestamp > 500 && read_joystick_button()) {
     unsigned long push_time = millis();
     while (read_joystick_button() && (millis() - push_time) <= 1000) {}
-    if (millis() - push_time > 1000) {
+    if (millis() - push_time > 1000) { // Cancel the calibration
       DCMotor::set_speed(0);
       switch_mode(move_home_then_wait);
-      while(read_joystick_button()) {}
+      while (read_joystick_button()) {}
       return;
     }
     switch (calibration_step) {
@@ -549,7 +554,7 @@ void calibration_mode() {
         profile_to_change.middle_x = ik_target_x;
         profile_to_change.middle_y = ik_target_y;
         break;
-      case 3: // Set bottom front
+      case 3:  // Set bottom front
         profile_to_change.front_x = ik_target_x;
         profile_to_change.front_y = ik_target_y;
         break;
