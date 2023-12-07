@@ -34,11 +34,11 @@ const float L2 = 100.0;
 // Linearly maps from 0-3.3 volts -> 0-2 amps
 // Servos "normally" draw 0.2 amps. Drawing 1 amp is usually when they are stuck on something.
 // The current values below are actually analogRead values.
-#define THRESHOLD_CURRENT 175  // This is deliberately above actual idle current. Setting this too low will result in speed reduction too early.
+#define THRESHOLD_CURRENT 215  // This is deliberately above actual idle current. Setting this too low will result in speed reduction too early.
 #define OVERLOAD_CURRENT 337.6
 #define SPEED_REDUCTION_STRENGTH 0.0184239377217  // Calculated as ln(0.05)/(threshold-overload), so speed is 20x slower at overload. See https://www.desmos.com/calculator/5mldupvozq
 // Battery voltage sensing
-#define LOW_POWER_VOLTAGE 522  // Calculated as half of 5.1 volts mapped from (0-5) -> (0-1023). If the voltage divider circuit measures below this value, then the device will shut off.
+#define LOW_POWER_VOLTAGE 512  // Calculated as half of 5 volts mapped from (0-5) -> (0-1023). If the voltage divider circuit measures below this value, then the device will shut off.
 
 // GLOBAL VARIABLES
 Profile profile = profiles[0];  // Stores the keypoints of the currently selected profile
