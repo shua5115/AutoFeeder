@@ -38,7 +38,7 @@ const float L2 = 100.0;
 #define OVERLOAD_CURRENT 337.6
 constexpr float SPEED_REDUCTION_STRENGTH = log(0.05)/(THRESHOLD_CURRENT-OVERLOAD_CURRENT); // Speed is 20x slower at overload. See https://www.desmos.com/calculator/5mldupvozq
 // Battery voltage sensing
-#define LOW_POWER_VOLTAGE 512  // Calculated as half of 5 volts mapped from (0-5) -> (0-1023). If the voltage divider circuit measures below this value, then the device will shut off.
+#define LOW_POWER_VOLTAGE 562  // Calculated as half of 5.5 volts mapped from (0-5) -> (0-1023). If the voltage divider circuit measures below this value, then the device will shut off.
 
 // GLOBAL VARIABLES
 Profile profile = profiles[0];  // Stores the keypoints of the currently selected profile
