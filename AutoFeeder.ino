@@ -39,6 +39,8 @@ const float L2 = 100.0;
 constexpr float SPEED_REDUCTION_STRENGTH = log(0.05)/(THRESHOLD_CURRENT-OVERLOAD_CURRENT); // Speed is 20x slower at overload. See https://www.desmos.com/calculator/5mldupvozq
 // Battery voltage sensing
 #define LOW_POWER_VOLTAGE 562  // Calculated as half of 5.5 volts mapped from (0-5) -> (0-1023). If the voltage divider circuit measures below this value, then the device will shut off.
+// Minimum number of ms to press input until plate rotates.
+#define ROTATE_PLATE_TIME 500
 
 // GLOBAL VARIABLES
 Profile profile = profiles[0];  // Stores the keypoints of the currently selected profile
@@ -329,7 +331,14 @@ void wait_mode() {
   if (digitalRead(INPUT_PIN) == LOW) {
     int idx = check_profile_choice();
     profile = profiles[idx];
-    switch_mode(rotate_plate_step);
+    timestamp = millis();
+    while (digitalRead(INPUT_PIN) == LOW && (millis() - timestamp < ROTATE_PLATE_TIME)) {}
+    timestamp = millis() - timestamp;
+    if (timestamp >= ROTATE_PLATE_TIME) {
+      switch_mode(rotate_plate_step);
+    }else {
+      switch_mode(descend_step);
+    }
   }
   if (read_joystick_button()) {
     // Wait until joystick button is released
@@ -378,15 +387,14 @@ void rotate_plate_step() {
   if (pre) {
     timestamp = millis();
   }
-  // At this point, we are looping while the button is pressed, so we wait until the button is released
-  unsigned long elapsed = millis() - timestamp;
   // We don't switch until the elapsed time exceeds a certain value to ensure a minimum amount of plate rotation
-  if (digitalRead(INPUT_PIN) == HIGH && elapsed > 250) {
+  if (digitalRead(INPUT_PIN) == HIGH) {
     // then user has deactivated input and mode should be switched
     DCMotor::set_speed(0);
-    switch_mode(descend_step);
+    switch_mode(wait_mode);
+    delay(250);
   } else {
-    DCMotor::set_speed(DC_MOTOR_SPEED);
+    DCMotor::set_speed(DC_MOTOR_SPEED * min(timestamp, 1000) / 1000);
   }
   check_low_power();
 }
