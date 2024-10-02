@@ -387,6 +387,8 @@ void rotate_plate_step() {
   if (pre) {
     timestamp = millis();
   }
+
+  long elapsed = millis()-timestamp;
   // We don't switch until the elapsed time exceeds a certain value to ensure a minimum amount of plate rotation
   if (digitalRead(INPUT_PIN) == HIGH) {
     // then user has deactivated input and mode should be switched
@@ -394,7 +396,7 @@ void rotate_plate_step() {
     switch_mode(wait_mode);
     delay(250);
   } else {
-    DCMotor::set_speed(DC_MOTOR_SPEED * min(timestamp, 1000) / 1000);
+    DCMotor::set_speed(max(DC_MOTOR_SPEED * min(elapsed, 1000) / 1000, DC_MOTOR_SPEED / 2));
   }
   check_low_power();
 }
