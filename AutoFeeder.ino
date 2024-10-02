@@ -27,7 +27,7 @@ const float L2 = 100.0;
 #define SERVO_MAX_PW 2400
 // Units in radians/step (timestep dependent on code performance)
 #define MAX_JOINT_SPEED 0.00025  // In radians per step
-#define DC_MOTOR_SPEED 96        // From 0-255, an analogWrite value
+#define DC_MOTOR_SPEED 64        // From 0-255, an analogWrite value
 // Units in mm/step
 #define IK_STEP_SIZE 0.25
 // Current sensing

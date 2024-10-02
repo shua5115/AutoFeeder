@@ -2,8 +2,8 @@
 #include <Arduino.h>
 
 // Change these values to tune for your specific joystick
-#define X_CENTER 503
-#define Y_CENTER 504
+#define X_CENTER 680
+#define Y_CENTER 594
 #define X_DEADZONE 100
 #define Y_DEADZONE 100
 // X is inverted because of the orientation of the joystick
