@@ -239,6 +239,9 @@ void setup() {
       break;
     }
   }
+  // Setup joystick center
+  X_CENTER = analogRead(JOY_X_PIN);
+  Y_CENTER = analogRead(JOY_Y_PIN);
 }
 
 void loop() {
