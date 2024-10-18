@@ -47,6 +47,7 @@ Profile profile = profiles[0];  // Stores the keypoints of the currently selecte
 int profile_idx = 0;            // Stores the index of the selected profile in the list of profiles
 unsigned long timestamp;        // Keeps track of when states are entered
 Servo j1, j2;                   // Servo joints
+uint16_t X_CENTER, Y_CENTER;
 float q1 = 0;                   // current q1 position
 float q2 = 0;                   // current q2 position
 float q1_speed = 0;             // current q1 speed

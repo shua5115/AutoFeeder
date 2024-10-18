@@ -6,9 +6,7 @@
 #define JOY_Y_PIN 3
 #define JOYSTICK_BUTTON_PIN 7
 
-// Joystick center values
-uint16_t X_CENTER;
-uint16_t Y_CENTER;
+extern uint16_t X_CENTER, Y_CENTER;
 
 // Returns -1 if left of center, 1 if right of center, 0 if at center
 int read_joystick_x();
