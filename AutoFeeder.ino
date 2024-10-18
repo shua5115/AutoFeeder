@@ -330,6 +330,7 @@ void move_home_then_wait() {
   check_low_power();
 }
 
+/*
 void wait_mode() {
   // Input pin is pullup, so negative logic (pressed = LOW)
   if (digitalRead(INPUT_PIN) == LOW) {
@@ -374,6 +375,47 @@ void wait_mode() {
     }
   }
   check_low_power();
+}*/
+
+// ALT WAIT MODE
+void wait_mode() {
+  // Input pin is pullup, so negative logic (pressed = LOW)
+  if (digitalRead(INPUT_PIN) == LOW) {
+    while(digitalRead(INPUT_PIN) == LOW) {}
+    int idx = check_profile_choice();
+    profile = profiles[idx];
+    switch_mode(rotate_plate_step);
+  }
+  if (read_joystick_button()) {
+    // Wait until joystick button is released
+    timestamp = millis();
+    while ((read_joystick_button() && (millis() - timestamp < 10000)) || (millis() - timestamp < 100)) {
+      if (millis() - timestamp >= 5000) {
+        digitalWrite(WARNING_LED_PIN, LOW);
+      } else if (millis() - timestamp >= 1000) {
+        digitalWrite(WARNING_LED_PIN, HIGH);
+      }
+    }
+    digitalWrite(WARNING_LED_PIN, LOW);
+    timestamp = millis() - timestamp;
+    if (timestamp >= 10000) {
+      reset_profiles();
+      for (int i = 0; i < 4; i++) {
+        digitalWrite(WARNING_LED_PIN, HIGH);
+        delay(125);
+        digitalWrite(WARNING_LED_PIN, LOW);
+        delay(125);
+      }
+      while (read_joystick_button()) {}
+    } else if (timestamp > 1000) {
+      switch_mode(calibration_mode);
+    } else {
+      int idx = check_profile_choice();
+      profile = profiles[idx];
+      switch_mode(rotate_plate_step);
+    }
+  }
+  check_low_power();
 }
 
 void low_power_mode() {
@@ -387,6 +429,7 @@ void low_power_mode() {
   delay(500);
 }
 
+/*
 void rotate_plate_step() {
   if (pre) {
     timestamp = millis();
@@ -401,6 +444,24 @@ void rotate_plate_step() {
     delay(250);
   } else {
     DCMotor::set_speed(max(DC_MOTOR_SPEED * min(elapsed, 1000) / 1000, DC_MOTOR_SPEED / 2));
+  }
+  check_low_power();
+}*/
+
+// ALT ROTATE PLATE
+void rotate_plate_step() {
+  if (pre) {
+    timestamp = millis();
+  }
+  // At this point, we are looping while the button is not pressed, so we wait until the button is pressed again to move to scooping
+  unsigned long elapsed = millis() - timestamp;
+  // We don't switch until the elapsed time exceeds a certain value to ensure a minimum amount of plate rotation
+  if ((digitalRead(INPUT_PIN) == LOW || read_joystick_button()) && elapsed > 150) {
+    // then user has activated input and mode should be switched
+    DCMotor::set_speed(0);
+    switch_mode(descend_step);
+  } else {
+    DCMotor::set_speed(DC_MOTOR_SPEED);
   }
   check_low_power();
 }
