@@ -243,8 +243,6 @@ void setup() {
   // Setup joystick center
   X_CENTER = analogRead(JOY_X_PIN);
   Y_CENTER = analogRead(JOY_Y_PIN);
-
-  Serial.begin(19200);
 }
 
 void loop() {
@@ -446,7 +444,6 @@ void scoop_step() {
   }
   // exponentially decrease speed if we go over threshold current
   int current = analogRead(0);
-  // Serial.println(current);
   if (current > OVERLOAD_CURRENT) {
     q1_speed = 0;
     q2_speed = 0;
