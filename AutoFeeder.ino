@@ -34,8 +34,8 @@ const float L2 = 100.0;
 // Linearly maps from 0-3.3 volts -> 0-2 amps
 // Servos "normally" draw 0.2 amps. Drawing 1 amp is usually when they are stuck on something.
 // The current values below are actually analogRead values.
-#define THRESHOLD_CURRENT 215  // This is deliberately above actual idle current. Setting this too low will result in speed reduction too early.
-#define OVERLOAD_CURRENT 337.6
+#define THRESHOLD_CURRENT 500  // This is deliberately above actual idle current. Setting this too low will result in speed reduction too early.
+#define OVERLOAD_CURRENT 700
 constexpr float SPEED_REDUCTION_STRENGTH = log(0.05)/(THRESHOLD_CURRENT-OVERLOAD_CURRENT); // Speed is 20x slower at overload. See https://www.desmos.com/calculator/5mldupvozq
 // Battery voltage sensing
 #define LOW_POWER_VOLTAGE 562  // Calculated as half of 5.5 volts mapped from (0-5) -> (0-1023). If the voltage divider circuit measures below this value, then the device will shut off.
@@ -243,6 +243,8 @@ void setup() {
   // Setup joystick center
   X_CENTER = analogRead(JOY_X_PIN);
   Y_CENTER = analogRead(JOY_Y_PIN);
+
+  Serial.begin(19200);
 }
 
 void loop() {
@@ -444,6 +446,7 @@ void scoop_step() {
   }
   // exponentially decrease speed if we go over threshold current
   int current = analogRead(0);
+  // Serial.println(current);
   if (current > OVERLOAD_CURRENT) {
     q1_speed = 0;
     q2_speed = 0;
