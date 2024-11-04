@@ -27,15 +27,15 @@ const float L2 = 100.0;
 #define SERVO_MAX_PW 2400
 // Units in radians/step (timestep dependent on code performance)
 #define MAX_JOINT_SPEED 0.00025  // In radians per step
-#define DC_MOTOR_SPEED 64        // From 0-255, an analogWrite value
+#define DC_MOTOR_SPEED 255        // From 0-255, an analogWrite value
 // Units in mm/step
 #define IK_STEP_SIZE 0.25
 // Current sensing
 // Linearly maps from 0-3.3 volts -> 0-2 amps
 // Servos "normally" draw 0.2 amps. Drawing 1 amp is usually when they are stuck on something.
 // The current values below are actually analogRead values.
-#define THRESHOLD_CURRENT 500  // This is deliberately above actual idle current. Setting this too low will result in speed reduction too early.
-#define OVERLOAD_CURRENT 700
+#define THRESHOLD_CURRENT 700  // This is deliberately above actual idle current. Setting this too low will result in speed reduction too early.
+#define OVERLOAD_CURRENT 1000
 constexpr float SPEED_REDUCTION_STRENGTH = log(0.05)/(THRESHOLD_CURRENT-OVERLOAD_CURRENT); // Speed is 20x slower at overload. See https://www.desmos.com/calculator/5mldupvozq
 // Battery voltage sensing
 #define LOW_POWER_VOLTAGE 562  // Calculated as half of 5.5 volts mapped from (0-5) -> (0-1023). If the voltage divider circuit measures below this value, then the device will shut off.
@@ -45,7 +45,7 @@ constexpr float SPEED_REDUCTION_STRENGTH = log(0.05)/(THRESHOLD_CURRENT-OVERLOAD
 // GLOBAL VARIABLES
 Profile profile = profiles[0];  // Stores the keypoints of the currently selected profile
 int profile_idx = 0;            // Stores the index of the selected profile in the list of profiles
-unsigned long timestamp;        // Keeps track of when states are entered
+unsigned long timestamp;        // Used for various timing-based events
 Servo j1, j2;                   // Servo joints
 uint16_t X_CENTER, Y_CENTER;
 float q1 = 0;                   // current q1 position
@@ -330,7 +330,7 @@ void move_home_then_wait() {
   check_low_power();
 }
 
-/*
+
 void wait_mode() {
   // Input pin is pullup, so negative logic (pressed = LOW)
   if (digitalRead(INPUT_PIN) == LOW) {
@@ -371,52 +371,52 @@ void wait_mode() {
     } else {
       int idx = check_profile_choice();
       profile = profiles[idx];
-      switch_mode(rotate_plate_step);
-    }
-  }
-  check_low_power();
-}*/
-
-// ALT WAIT MODE
-void wait_mode() {
-  // Input pin is pullup, so negative logic (pressed = LOW)
-  if (digitalRead(INPUT_PIN) == LOW) {
-    while(digitalRead(INPUT_PIN) == LOW) {}
-    int idx = check_profile_choice();
-    profile = profiles[idx];
-    switch_mode(rotate_plate_step);
-  }
-  if (read_joystick_button()) {
-    // Wait until joystick button is released
-    timestamp = millis();
-    while ((read_joystick_button() && (millis() - timestamp < 10000)) || (millis() - timestamp < 100)) {
-      if (millis() - timestamp >= 5000) {
-        digitalWrite(WARNING_LED_PIN, LOW);
-      } else if (millis() - timestamp >= 1000) {
-        digitalWrite(WARNING_LED_PIN, HIGH);
-      }
-    }
-    digitalWrite(WARNING_LED_PIN, LOW);
-    timestamp = millis() - timestamp;
-    if (timestamp >= 10000) {
-      reset_profiles();
-      for (int i = 0; i < 4; i++) {
-        digitalWrite(WARNING_LED_PIN, HIGH);
-        delay(125);
-        digitalWrite(WARNING_LED_PIN, LOW);
-        delay(125);
-      }
-      while (read_joystick_button()) {}
-    } else if (timestamp > 1000) {
-      switch_mode(calibration_mode);
-    } else {
-      int idx = check_profile_choice();
-      profile = profiles[idx];
-      switch_mode(rotate_plate_step);
+      switch_mode(descend_step);
     }
   }
   check_low_power();
 }
+
+// ALT WAIT MODE
+// void wait_mode() {
+//   // Input pin is pullup, so negative logic (pressed = LOW)
+//   if (digitalRead(INPUT_PIN) == LOW) {
+//     while(digitalRead(INPUT_PIN) == LOW) {}
+//     int idx = check_profile_choice();
+//     profile = profiles[idx];
+//     switch_mode(rotate_plate_step);
+//   }
+//   if (read_joystick_button()) {
+//     // Wait until joystick button is released
+//     timestamp = millis();
+//     while ((read_joystick_button() && (millis() - timestamp < 10000)) || (millis() - timestamp < 100)) {
+//       if (millis() - timestamp >= 5000) {
+//         digitalWrite(WARNING_LED_PIN, LOW);
+//       } else if (millis() - timestamp >= 1000) {
+//         digitalWrite(WARNING_LED_PIN, HIGH);
+//       }
+//     }
+//     digitalWrite(WARNING_LED_PIN, LOW);
+//     timestamp = millis() - timestamp;
+//     if (timestamp >= 10000) {
+//       reset_profiles();
+//       for (int i = 0; i < 4; i++) {
+//         digitalWrite(WARNING_LED_PIN, HIGH);
+//         delay(125);
+//         digitalWrite(WARNING_LED_PIN, LOW);
+//         delay(125);
+//       }
+//       while (read_joystick_button()) {}
+//     } else if (timestamp > 1000) {
+//       switch_mode(calibration_mode);
+//     } else {
+//       int idx = check_profile_choice();
+//       profile = profiles[idx];
+//       switch_mode(rotate_plate_step);
+//     }
+//   }
+//   check_low_power();
+// }
 
 void low_power_mode() {
   if (pre) {
@@ -429,7 +429,7 @@ void low_power_mode() {
   delay(500);
 }
 
-/*
+
 void rotate_plate_step() {
   if (pre) {
     timestamp = millis();
@@ -446,25 +446,25 @@ void rotate_plate_step() {
     DCMotor::set_speed(max(DC_MOTOR_SPEED * min(elapsed, 1000) / 1000, DC_MOTOR_SPEED / 2));
   }
   check_low_power();
-}*/
+}
 
 // ALT ROTATE PLATE
-void rotate_plate_step() {
-  if (pre) {
-    timestamp = millis();
-  }
-  // At this point, we are looping while the button is not pressed, so we wait until the button is pressed again to move to scooping
-  unsigned long elapsed = millis() - timestamp;
-  // We don't switch until the elapsed time exceeds a certain value to ensure a minimum amount of plate rotation
-  if ((digitalRead(INPUT_PIN) == LOW || read_joystick_button()) && elapsed > 150) {
-    // then user has activated input and mode should be switched
-    DCMotor::set_speed(0);
-    switch_mode(descend_step);
-  } else {
-    DCMotor::set_speed(DC_MOTOR_SPEED);
-  }
-  check_low_power();
-}
+// void rotate_plate_step() {
+//   if (pre) {
+//     timestamp = millis();
+//   }
+//   // At this point, we are looping while the button is not pressed, so we wait until the button is pressed again to move to scooping
+//   unsigned long elapsed = millis() - timestamp;
+//   // We don't switch until the elapsed time exceeds a certain value to ensure a minimum amount of plate rotation
+//   if ((digitalRead(INPUT_PIN) == LOW || read_joystick_button()) && elapsed > 150) {
+//     // then user has activated input and mode should be switched
+//     DCMotor::set_speed(0);
+//     switch_mode(descend_step);
+//   } else {
+//     DCMotor::set_speed(DC_MOTOR_SPEED);
+//   }
+//   check_low_power();
+// }
 
 void descend_step() {
   if (pre) {
@@ -551,11 +551,20 @@ void return_step() {
   if (pre) {
     ik_target_x = profile.end_x;
     ik_target_y = profile.end_y + 30.0; // Make sure to clear the bowl/plate
+    if (constrain_ik_point(ik_target_x, ik_target_y)) {
+      reset_profiles();
+      profile = profiles[check_profile_choice()];
+      switch_mode(lift_step_fk);
+      digitalWrite(WARNING_LED_PIN, HIGH);
+      delay(25);
+      digitalWrite(WARNING_LED_PIN, LOW);
+    }
     calc_ik(ik_target_x, ik_target_y, fk_target_q1, fk_target_q2);
     balance_speed(fk_target_q1, fk_target_q2, MAX_JOINT_SPEED, q1_speed, q2_speed);
   }
   bool fk_done = step_joint_positions(fk_target_q1, fk_target_q2, q1_speed, q2_speed);
   write_servos(q1, q2);
+  
   if (fk_done) {
     switch_mode(move_home_then_wait);
   }
