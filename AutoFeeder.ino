@@ -519,8 +519,9 @@ void scoop_step() {
 
   fk_step = !step_joint_positions(fk_target_q1, fk_target_q2, q1_speed, q2_speed);
   write_servos(q1, q2);
+  // Input giving during step.
   if (digitalRead(INPUT_PIN) == LOW || read_joystick_button()) {
-    switch_mode(move_home_then_wait);
+    switch_mode(cancel_scoop_up_step);
   }
   check_low_power();
 }
@@ -568,6 +569,47 @@ void return_step() {
   if (fk_done) {
     switch_mode(move_home_then_wait);
   }
+}
+
+void cancel_scoop_up_step() {
+  if (pre) {
+    fk_step = 0;
+    timestamp = millis();
+  }
+  if (fk_step == 0) {
+    float x = 0, y = 0;
+    bool profile_success = get_profile_step(profile, 4, x, y);
+    if (profile_success) {
+      int ik_done = step_ik_target(ik_target_x, y, IK_STEP_SIZE);
+      bool ik_success = calc_ik(ik_target_x, ik_target_y, fk_target_q1, fk_target_q2);
+    } else {
+      // We are done stepping through the profile, go to next mode
+      switch_mode(cancel_scoop_out_step);
+    }
+  }
+  fk_step = !step_joint_positions(fk_target_q1, fk_target_q2, q1_speed, q2_speed);
+  write_servos(q1, q2);
+  check_low_power();
+}
+void cancel_scoop_out_step() {
+  if (pre) {
+    fk_step = 0;
+    timestamp = millis();
+  }
+  if (fk_step == 0) {
+    float x = 0, y = 0;
+    bool profile_success = get_profile_step(profile, 4, x, y);
+    if (profile_success) {
+      int ik_done = step_ik_target(x, y, IK_STEP_SIZE);
+      bool ik_success = calc_ik(ik_target_x, ik_target_y, fk_target_q1, fk_target_q2);
+    } else {
+      // We are done stepping through the profile, go to next mode
+      switch_mode(lift_step_fk);
+    }
+  }
+  fk_step = !step_joint_positions(fk_target_q1, fk_target_q2, q1_speed, q2_speed);
+  write_servos(q1, q2);
+  check_low_power();
 }
 
 void head_nod() {
