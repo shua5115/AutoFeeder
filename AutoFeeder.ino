@@ -31,12 +31,7 @@ const float L2 = 100.0;
 // Units in mm/step
 #define IK_STEP_SIZE 0.25
 // Current sensing
-// Linearly maps from 0-3.3 volts -> 0-2 amps
-// Servos "normally" draw 0.2 amps. Drawing 1 amp is usually when they are stuck on something.
-// The current values below are actually analogRead values.
-#define THRESHOLD_CURRENT 700  // This is deliberately above actual idle current. Setting this too low will result in speed reduction too early.
-#define OVERLOAD_CURRENT 1000
-constexpr float SPEED_REDUCTION_STRENGTH = log(0.05)/(THRESHOLD_CURRENT-OVERLOAD_CURRENT); // Speed is 20x slower at overload. See https://www.desmos.com/calculator/5mldupvozq
+#define OVERLOAD_CURRENT 300
 // Battery voltage sensing
 #define LOW_POWER_VOLTAGE 562  // Calculated as half of 5.5 volts mapped from (0-5) -> (0-1023). If the voltage divider circuit measures below this value, then the device will shut off.
 // Minimum number of ms to press input until plate rotates.
@@ -341,7 +336,7 @@ void wait_mode() {
     timestamp = millis() - timestamp;
     if (timestamp >= ROTATE_PLATE_TIME) {
       switch_mode(rotate_plate_step);
-    }else {
+    } else if(timestamp > 50) {
       switch_mode(descend_step);
     }
   }
@@ -443,7 +438,7 @@ void rotate_plate_step() {
     switch_mode(wait_mode);
     delay(250);
   } else {
-    DCMotor::set_speed(max(DC_MOTOR_SPEED * min(elapsed, 1000) / 1000, DC_MOTOR_SPEED / 2));
+    DCMotor::set_speed(max(DC_MOTOR_SPEED * min(elapsed, 1000) / 1000, DC_MOTOR_SPEED / 3));
   }
   check_low_power();
 }
@@ -484,37 +479,33 @@ void descend_step() {
 }
 
 void scoop_step() {
+  static float y_off;
   if (pre) {
+    y_off = 0;
     ik_step = 1;
     fk_step = 0;
     timestamp = millis();
   }
+  float x_dest = 0, y_dest = 0;
+  bool profile_success = get_profile_step(profile, ik_step, x_dest, y_dest);
   if (fk_step == 0) {
-    float x = 0, y = 0;
-    bool profile_success = get_profile_step(profile, ik_step, x, y);
     if (profile_success) {
-      int ik_done = step_ik_target(x, y, IK_STEP_SIZE);
+      int ik_done = step_ik_target(x_dest, y_dest, IK_STEP_SIZE);
       if (ik_done) {
         ik_step += 1;
       }
-      bool ik_success = calc_ik(ik_target_x, ik_target_y, fk_target_q1, fk_target_q2);
+      bool ik_success = calc_ik(ik_target_x, min(ik_target_y+y_off, profile.end_y), fk_target_q1, fk_target_q2);
     } else {
       // We are done stepping through the profile, go to next mode
       switch_mode(lift_step_fk);
     }
   }
-  // exponentially decrease speed if we go over threshold current
   int current = analogRead(0);
   if (current > OVERLOAD_CURRENT) {
-    q1_speed = 0;
-    q2_speed = 0;
-  } else if (current > THRESHOLD_CURRENT) {
-    float speed_perc = exp(SPEED_REDUCTION_STRENGTH * (THRESHOLD_CURRENT - current));
-    q1_speed = MAX_JOINT_SPEED * speed_perc;
-    q2_speed = MAX_JOINT_SPEED * speed_perc;
-  } else {
-    q1_speed = MAX_JOINT_SPEED;
-    q2_speed = MAX_JOINT_SPEED;
+    // move back and add a vertical offset to IK_TARGET_Y
+    step_ik_target(x_dest, y_dest, -10*IK_STEP_SIZE);
+    y_off += 2*IK_STEP_SIZE;
+    bool ik_success = calc_ik(ik_target_x, min(ik_target_y+y_off, profile.end_y), fk_target_q1, fk_target_q2);
   }
 
   fk_step = !step_joint_positions(fk_target_q1, fk_target_q2, q1_speed, q2_speed);
