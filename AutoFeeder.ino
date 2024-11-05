@@ -573,14 +573,18 @@ void return_step() {
 
 void cancel_scoop_up_step() {
   if (pre) {
+    ik_step = 4;
     fk_step = 0;
     timestamp = millis();
   }
   if (fk_step == 0) {
     float x = 0, y = 0;
-    bool profile_success = get_profile_step(profile, 4, x, y);
+    bool profile_success = get_profile_step(profile, ik_step, x, y);
     if (profile_success) {
       int ik_done = step_ik_target(ik_target_x, y, IK_STEP_SIZE);
+      if (ik_done) {
+        ik_step += 1;
+      }
       bool ik_success = calc_ik(ik_target_x, ik_target_y, fk_target_q1, fk_target_q2);
     } else {
       // We are done stepping through the profile, go to next mode
@@ -593,14 +597,18 @@ void cancel_scoop_up_step() {
 }
 void cancel_scoop_out_step() {
   if (pre) {
+    ik_step = 4;
     fk_step = 0;
     timestamp = millis();
   }
   if (fk_step == 0) {
     float x = 0, y = 0;
-    bool profile_success = get_profile_step(profile, 4, x, y);
+    bool profile_success = get_profile_step(profile, ik_step, x, y);
     if (profile_success) {
       int ik_done = step_ik_target(x, y, IK_STEP_SIZE);
+      if (ik_done) {
+        ik_step += 1;
+      }
       bool ik_success = calc_ik(ik_target_x, ik_target_y, fk_target_q1, fk_target_q2);
     } else {
       // We are done stepping through the profile, go to next mode
