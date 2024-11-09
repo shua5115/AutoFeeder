@@ -26,12 +26,13 @@ const float L2 = 100.0;
 #define SERVO_MIN_PW 544
 #define SERVO_MAX_PW 2400
 // Units in radians/step (timestep dependent on code performance)
-#define MAX_JOINT_SPEED 0.00025  // In radians per step
+#define MAX_JOINT_SPEED 0.0003  // In radians per step
 #define DC_MOTOR_SPEED 255        // From 0-255, an analogWrite value
 // Units in mm/step
 #define IK_STEP_SIZE 0.25
 // Current sensing
-#define OVERLOAD_CURRENT 300
+#define THRESHOLD_CURRENT 400
+#define OVERLOAD_CURRENT 500
 // Battery voltage sensing
 #define LOW_POWER_VOLTAGE 562  // Calculated as half of 5.5 volts mapped from (0-5) -> (0-1023). If the voltage divider circuit measures below this value, then the device will shut off.
 // Minimum number of ms to press input until plate rotates.
@@ -223,7 +224,7 @@ void setup() {
   for (int i = 0; i < NUM_PROFILES; i++) {
     load_profile(i, profiles[i]);
   }
-  profile = profiles[0];
+  profile = profiles[check_profile_choice()];
   // When the servos turn on, they snap to their start position at full speed
   // So, this position is one that is unlikely to hit an obstacle.
   write_servos(-2.09, 2.09);            // This is -120 and 120 degrees, making an equilateral triangle.
@@ -486,11 +487,20 @@ void scoop_step() {
     fk_step = 0;
     timestamp = millis();
   }
-  float x_dest = 0, y_dest = 0;
-  bool profile_success = get_profile_step(profile, ik_step, x_dest, y_dest);
   if (fk_step == 0) {
+    float x_dest = 0, y_dest = 0;
+    bool profile_success = get_profile_step(profile, ik_step, x_dest, y_dest);
     if (profile_success) {
-      int ik_done = step_ik_target(x_dest, y_dest, IK_STEP_SIZE);
+      int current = analogRead(0);
+      digitalWrite(WARNING_LED_PIN, current > THRESHOLD_CURRENT);
+      int ik_done = 0;
+      if (current > OVERLOAD_CURRENT) switch_mode(move_home_then_wait);
+      else if (current > THRESHOLD_CURRENT) {
+        y_off += 4*IK_STEP_SIZE;
+        ik_step = max(1, ik_step-1);
+      }
+      else ik_done = step_ik_target(x_dest, y_dest, IK_STEP_SIZE);
+      
       if (ik_done) {
         ik_step += 1;
       }
@@ -499,13 +509,6 @@ void scoop_step() {
       // We are done stepping through the profile, go to next mode
       switch_mode(lift_step_fk);
     }
-  }
-  int current = analogRead(0);
-  if (current > OVERLOAD_CURRENT) {
-    // move back and add a vertical offset to IK_TARGET_Y
-    step_ik_target(x_dest, y_dest, -10*IK_STEP_SIZE);
-    y_off += 2*IK_STEP_SIZE;
-    bool ik_success = calc_ik(ik_target_x, min(ik_target_y+y_off, profile.end_y), fk_target_q1, fk_target_q2);
   }
 
   fk_step = !step_joint_positions(fk_target_q1, fk_target_q2, q1_speed, q2_speed);
@@ -525,6 +528,11 @@ void lift_step_fk() {
     ik_target_y = 0.0;
     balance_speed(fk_target_q1, fk_target_q2, MAX_JOINT_SPEED * 0.75, q1_speed, q2_speed);
   }
+  int current = analogRead(0);
+  if (current > THRESHOLD_CURRENT) {
+    switch_mode(return_step);
+  }
+
   bool fk_done = step_joint_positions(fk_target_q1, fk_target_q2, q1_speed, q2_speed);
   write_servos(q1, q2);
   if (fk_done) {
