@@ -1,0 +1,50 @@
+\doxysection{DCMotor.\+cpp File Reference}
+\hypertarget{_d_c_motor_8cpp}{}\label{_d_c_motor_8cpp}\index{DCMotor.cpp@{DCMotor.cpp}}
+{\ttfamily \#include "{}DCMotor.\+h"{}}\newline
+{\ttfamily \#include $<$Arduino.\+h$>$}\newline
+\doxysubsubsection*{Namespaces}
+\begin{DoxyCompactItemize}
+\item 
+namespace \mbox{\hyperlink{namespace_d_c_motor}{DCMotor}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{_d_c_motor_8cpp_a87d84e29a5432c19e45047c598d29206}{DC\+\_\+\+DIR\+\_\+\+PIN}}~13
+\item 
+\#define \mbox{\hyperlink{_d_c_motor_8cpp_a87b6c3bdf74c4ae67cb014fddda0b38d}{DC\+\_\+\+PWM\+\_\+\+PIN}}~11
+\item 
+\#define \mbox{\hyperlink{_d_c_motor_8cpp_a1f6e842293db02df102642b2f1f01844}{DC\+\_\+\+BRAKE\+\_\+\+PIN}}~8
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{namespace_d_c_motor_a43fd13bc28e3d126618bd2e0bdccb943}{DCMotor\+::attach}} ()
+\item 
+void \mbox{\hyperlink{namespace_d_c_motor_a6546a3206e8016efe0fa8f389f4e9b2e}{DCMotor\+::set\+\_\+brake}} (bool brake)
+\begin{DoxyCompactList}\small\item\em Engages or disengages the brake of the motor. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{namespace_d_c_motor_a159818f7c905f20b3989bf42636bc9a8}{DCMotor\+::set\+\_\+speed}} (uint8\+\_\+t speed)
+\begin{DoxyCompactList}\small\item\em Sets the speed of the motor. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{namespace_d_c_motor_ae881345b7fa1a5f851f5b9c3013b8204}{DCMotor\+::set\+\_\+direction}} (bool dir)
+\begin{DoxyCompactList}\small\item\em Sets the direction of the motor. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\Hypertarget{_d_c_motor_8cpp_a1f6e842293db02df102642b2f1f01844}\index{DCMotor.cpp@{DCMotor.cpp}!DC\_BRAKE\_PIN@{DC\_BRAKE\_PIN}}
+\index{DC\_BRAKE\_PIN@{DC\_BRAKE\_PIN}!DCMotor.cpp@{DCMotor.cpp}}
+\doxysubsubsection{\texorpdfstring{DC\_BRAKE\_PIN}{DC\_BRAKE\_PIN}}
+{\footnotesize\ttfamily \label{_d_c_motor_8cpp_a1f6e842293db02df102642b2f1f01844} 
+\#define DC\+\_\+\+BRAKE\+\_\+\+PIN~8}
+
+\Hypertarget{_d_c_motor_8cpp_a87d84e29a5432c19e45047c598d29206}\index{DCMotor.cpp@{DCMotor.cpp}!DC\_DIR\_PIN@{DC\_DIR\_PIN}}
+\index{DC\_DIR\_PIN@{DC\_DIR\_PIN}!DCMotor.cpp@{DCMotor.cpp}}
+\doxysubsubsection{\texorpdfstring{DC\_DIR\_PIN}{DC\_DIR\_PIN}}
+{\footnotesize\ttfamily \label{_d_c_motor_8cpp_a87d84e29a5432c19e45047c598d29206} 
+\#define DC\+\_\+\+DIR\+\_\+\+PIN~13}
+
+\Hypertarget{_d_c_motor_8cpp_a87b6c3bdf74c4ae67cb014fddda0b38d}\index{DCMotor.cpp@{DCMotor.cpp}!DC\_PWM\_PIN@{DC\_PWM\_PIN}}
+\index{DC\_PWM\_PIN@{DC\_PWM\_PIN}!DCMotor.cpp@{DCMotor.cpp}}
+\doxysubsubsection{\texorpdfstring{DC\_PWM\_PIN}{DC\_PWM\_PIN}}
+{\footnotesize\ttfamily \label{_d_c_motor_8cpp_a87b6c3bdf74c4ae67cb014fddda0b38d} 
+\#define DC\+\_\+\+PWM\+\_\+\+PIN~11}
+

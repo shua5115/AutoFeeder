@@ -1,0 +1,25 @@
+\doxysection{kinematics.\+h}
+\hypertarget{kinematics_8h_source}{}\label{kinematics_8h_source}\mbox{\hyperlink{kinematics_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#ifndef\ KINEMATICS\_H}}
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#define\ KINEMATICS\_H}}
+\DoxyCodeLine{00003\ }
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#define\ Q1\_HOME\ -\/3.1415926}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#define\ Q2\_HOME\ 2.1817}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#define\ HOME\_X\ -\/42.6424}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#define\ HOME\_Y\ -\/81.9152}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{keyword}{extern}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ \mbox{\hyperlink{kinematics_8h_a04a2000d1c2e217d4edb9812fbebb37f}{L1}};}
+\DoxyCodeLine{00010\ \textcolor{keyword}{extern}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{float}\ \mbox{\hyperlink{kinematics_8h_ac922ced2094e330e1be36ddda8889937}{L2}};}
+\DoxyCodeLine{00011\ }
+\DoxyCodeLine{00015\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{kinematics_8h_abf72c3ad0bff57d64ce998efcd110086}{calc\_fk}}(\textcolor{keywordtype}{float}\ \mbox{\hyperlink{_auto_feeder_8ino_a209c65446ca302d32cbb908c4d75f616}{q1}},\ \textcolor{keywordtype}{float}\ \mbox{\hyperlink{_auto_feeder_8ino_afddca3451c589f7b5928b6dccf8c88ba}{q2}},\ \textcolor{keywordtype}{float}\ \&x\_ptr,\ \textcolor{keywordtype}{float}\ \&y\_ptr);}
+\DoxyCodeLine{00016\ }
+\DoxyCodeLine{00020\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{kinematics_8h_a1cfcbc6e1214663208e6735a45e0ec62}{calc\_ik}}(\textcolor{keywordtype}{float}\ x,\ \textcolor{keywordtype}{float}\ y,\ \textcolor{keywordtype}{float}\ \&q1\_ptr,\ \textcolor{keywordtype}{float}\ \&q2\_ptr);}
+\DoxyCodeLine{00021\ }
+\DoxyCodeLine{00022\ \textcolor{comment}{//\ Constrains\ an\ ik\ point\ to\ be\ within\ workspace\ bounds.}}
+\DoxyCodeLine{00023\ \textcolor{comment}{//\ Returns\ true\ if\ the\ point\ was\ modified}}
+\DoxyCodeLine{00024\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{kinematics_8h_ae00fd6a44ee1227579d283195cf571a7}{constrain\_ik\_point}}(\textcolor{keywordtype}{float}\ \&x,\ \textcolor{keywordtype}{float}\ \&y);}
+\DoxyCodeLine{00025\ }
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

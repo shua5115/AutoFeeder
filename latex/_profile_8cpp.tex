@@ -1,0 +1,126 @@
+\doxysection{Profile.\+cpp File Reference}
+\hypertarget{_profile_8cpp}{}\label{_profile_8cpp}\index{Profile.cpp@{Profile.cpp}}
+{\ttfamily \#include "{}Profile.\+h"{}}\newline
+{\ttfamily \#include "{}kinematics.\+h"{}}\newline
+{\ttfamily \#include $<$Arduino.\+h$>$}\newline
+{\ttfamily \#include $<$EEPROM.\+h$>$}\newline
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{_profile_8cpp_afde3951e511652150730522060e0fee1}{PROFILE\+\_\+\+EEPROM\+\_\+\+START}}~0
+\item 
+\#define \mbox{\hyperlink{_profile_8cpp_a5521a6541506aec04f0ec35424766d05}{PROFILE\+\_\+\+EEPROM\+\_\+\+LEN}}~4
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{_profile_8cpp_a03f6edee9e54ba61e4c1011ef918447c}{reset\+\_\+profiles}} ()
+\item 
+bool \mbox{\hyperlink{_profile_8cpp_a1cb6f2fa2792c5085d8b016d131fe1d0}{save\+\_\+profile}} (const \mbox{\hyperlink{struct_profile}{Profile}} \&p, uint8\+\_\+t idx)
+\begin{DoxyCompactList}\small\item\em Saves a profile to an index in EEPROM. Returns if the save was successful. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{_profile_8cpp_ae6aa45c7c83ff9fa09d9a6e670031156}{load\+\_\+profile}} (uint8\+\_\+t idx, \mbox{\hyperlink{struct_profile}{Profile}} \&p)
+\begin{DoxyCompactList}\small\item\em Loads a profile from a specified index in EEPROM. Returns if the load was successful. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{_profile_8cpp_ad9c6d7db8534b9cbfaea71061723d544}{get\+\_\+profile\+\_\+step}} (const \mbox{\hyperlink{struct_profile}{Profile}} \&p, int step, float \&x\+\_\+addr, float \&y\+\_\+addr)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{struct_profile}{Profile}} \mbox{\hyperlink{_profile_8cpp_a060804bdb06901e79d27172a5837fc6a}{profiles}} \mbox{[}4\mbox{]}
+\item 
+\mbox{\hyperlink{struct_profile}{Profile}} \mbox{\hyperlink{_profile_8cpp_a3f1378c9b60bbfe69f63044fb1c65a7a}{plate\+\_\+profile}}
+\item 
+\mbox{\hyperlink{struct_profile}{Profile}} \mbox{\hyperlink{_profile_8cpp_aa38e72612905e4097513b4fbe45f0e4c}{bowl\+\_\+profile}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\Hypertarget{_profile_8cpp_a5521a6541506aec04f0ec35424766d05}\index{Profile.cpp@{Profile.cpp}!PROFILE\_EEPROM\_LEN@{PROFILE\_EEPROM\_LEN}}
+\index{PROFILE\_EEPROM\_LEN@{PROFILE\_EEPROM\_LEN}!Profile.cpp@{Profile.cpp}}
+\doxysubsubsection{\texorpdfstring{PROFILE\_EEPROM\_LEN}{PROFILE\_EEPROM\_LEN}}
+{\footnotesize\ttfamily \label{_profile_8cpp_a5521a6541506aec04f0ec35424766d05} 
+\#define PROFILE\+\_\+\+EEPROM\+\_\+\+LEN~4}
+
+\Hypertarget{_profile_8cpp_afde3951e511652150730522060e0fee1}\index{Profile.cpp@{Profile.cpp}!PROFILE\_EEPROM\_START@{PROFILE\_EEPROM\_START}}
+\index{PROFILE\_EEPROM\_START@{PROFILE\_EEPROM\_START}!Profile.cpp@{Profile.cpp}}
+\doxysubsubsection{\texorpdfstring{PROFILE\_EEPROM\_START}{PROFILE\_EEPROM\_START}}
+{\footnotesize\ttfamily \label{_profile_8cpp_afde3951e511652150730522060e0fee1} 
+\#define PROFILE\+\_\+\+EEPROM\+\_\+\+START~0}
+
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{_profile_8cpp_ad9c6d7db8534b9cbfaea71061723d544}\index{Profile.cpp@{Profile.cpp}!get\_profile\_step@{get\_profile\_step}}
+\index{get\_profile\_step@{get\_profile\_step}!Profile.cpp@{Profile.cpp}}
+\doxysubsubsection{\texorpdfstring{get\_profile\_step()}{get\_profile\_step()}}
+{\footnotesize\ttfamily \label{_profile_8cpp_ad9c6d7db8534b9cbfaea71061723d544} 
+bool get\+\_\+profile\+\_\+step (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{struct_profile}{Profile}} \&}]{p}{, }\item[{int}]{step}{, }\item[{float \&}]{x\+\_\+addr}{, }\item[{float \&}]{y\+\_\+addr}{}\end{DoxyParamCaption})}
+
+\Hypertarget{_profile_8cpp_ae6aa45c7c83ff9fa09d9a6e670031156}\index{Profile.cpp@{Profile.cpp}!load\_profile@{load\_profile}}
+\index{load\_profile@{load\_profile}!Profile.cpp@{Profile.cpp}}
+\doxysubsubsection{\texorpdfstring{load\_profile()}{load\_profile()}}
+{\footnotesize\ttfamily \label{_profile_8cpp_ae6aa45c7c83ff9fa09d9a6e670031156} 
+bool load\+\_\+profile (\begin{DoxyParamCaption}\item[{uint8\+\_\+t}]{idx}{, }\item[{\mbox{\hyperlink{struct_profile}{Profile}} \&}]{p}{}\end{DoxyParamCaption})}
+
+
+
+Loads a profile from a specified index in EEPROM. Returns if the load was successful. 
+
+\Hypertarget{_profile_8cpp_a03f6edee9e54ba61e4c1011ef918447c}\index{Profile.cpp@{Profile.cpp}!reset\_profiles@{reset\_profiles}}
+\index{reset\_profiles@{reset\_profiles}!Profile.cpp@{Profile.cpp}}
+\doxysubsubsection{\texorpdfstring{reset\_profiles()}{reset\_profiles()}}
+{\footnotesize\ttfamily \label{_profile_8cpp_a03f6edee9e54ba61e4c1011ef918447c} 
+void reset\+\_\+profiles (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\Hypertarget{_profile_8cpp_a1cb6f2fa2792c5085d8b016d131fe1d0}\index{Profile.cpp@{Profile.cpp}!save\_profile@{save\_profile}}
+\index{save\_profile@{save\_profile}!Profile.cpp@{Profile.cpp}}
+\doxysubsubsection{\texorpdfstring{save\_profile()}{save\_profile()}}
+{\footnotesize\ttfamily \label{_profile_8cpp_a1cb6f2fa2792c5085d8b016d131fe1d0} 
+bool save\+\_\+profile (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{struct_profile}{Profile}} \&}]{p}{, }\item[{uint8\+\_\+t}]{idx}{}\end{DoxyParamCaption})}
+
+
+
+Saves a profile to an index in EEPROM. Returns if the save was successful. 
+
+
+
+\doxysubsection{Variable Documentation}
+\Hypertarget{_profile_8cpp_aa38e72612905e4097513b4fbe45f0e4c}\index{Profile.cpp@{Profile.cpp}!bowl\_profile@{bowl\_profile}}
+\index{bowl\_profile@{bowl\_profile}!Profile.cpp@{Profile.cpp}}
+\doxysubsubsection{\texorpdfstring{bowl\_profile}{bowl\_profile}}
+{\footnotesize\ttfamily \label{_profile_8cpp_aa38e72612905e4097513b4fbe45f0e4c} 
+\mbox{\hyperlink{struct_profile}{Profile}} bowl\+\_\+profile}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{=\ \{}
+\DoxyCodeLine{\ \ -\/75,\ -\/82.5,\ \ }
+\DoxyCodeLine{\ \ -\/70,\ -\/175,\ \ \ }
+\DoxyCodeLine{\ \ 0,\ -\/175,\ \ \ \ \ }
+\DoxyCodeLine{\ \ 70,\ -\/175,\ \ \ \ }
+\DoxyCodeLine{\ \ 60,\ -\/90\ \ \ \ \ \ }
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+\Hypertarget{_profile_8cpp_a3f1378c9b60bbfe69f63044fb1c65a7a}\index{Profile.cpp@{Profile.cpp}!plate\_profile@{plate\_profile}}
+\index{plate\_profile@{plate\_profile}!Profile.cpp@{Profile.cpp}}
+\doxysubsubsection{\texorpdfstring{plate\_profile}{plate\_profile}}
+{\footnotesize\ttfamily \label{_profile_8cpp_a3f1378c9b60bbfe69f63044fb1c65a7a} 
+\mbox{\hyperlink{struct_profile}{Profile}} plate\+\_\+profile}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{=\ \{}
+\DoxyCodeLine{\ \ -\/80,\ -\/155,\ \ }
+\DoxyCodeLine{\ \ -\/76,\ -\/175,\ \ }
+\DoxyCodeLine{\ \ 0,\ -\/177.5,\ \ \ \ }
+\DoxyCodeLine{\ \ 76,\ -\/180,\ \ \ }
+\DoxyCodeLine{\ \ 80,\ -\/155\ \ \ \ }
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+\Hypertarget{_profile_8cpp_a060804bdb06901e79d27172a5837fc6a}\index{Profile.cpp@{Profile.cpp}!profiles@{profiles}}
+\index{profiles@{profiles}!Profile.cpp@{Profile.cpp}}
+\doxysubsubsection{\texorpdfstring{profiles}{profiles}}
+{\footnotesize\ttfamily \label{_profile_8cpp_a060804bdb06901e79d27172a5837fc6a} 
+\mbox{\hyperlink{struct_profile}{Profile}} profiles\mbox{[}4\mbox{]}}
+

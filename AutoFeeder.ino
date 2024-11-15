@@ -1,3 +1,7 @@
+/**
+ * @file AutoFeeder.ino
+ * @brief Main functionality for AutoFeeder use.
+ */
 #include <Servo.h>
 #include <stdint.h>
 #include "DCMotor.h"
@@ -57,7 +61,13 @@ size_t ik_step = 0;             // keeps track of inverse kinematics progress
 uint8_t prev_profile_idx = 0;   // keeps track of the previous profile index to detect when the selection changes
 
 #pragma region Step Code
-/// Returns 1 if finished, 0 otherwise
+/**
+ * @brief Steps from current ik target towards the target position by a given step length.
+ * @param x_target Target for x-coordinate.
+ * @param y_target Target for y-coordinate.
+ * @param step_length The incremental step length to get to ik target.
+ * @returns 1 if finished, 0 otherwise.
+ */
 int step_ik_target(float x_target, float y_target, float step_length) {
   float x_delta, y_delta;
   // current position is stored in ik_target_x, ik_target_y
@@ -81,7 +91,14 @@ int step_ik_target(float x_target, float y_target, float step_length) {
   return 0;
 }
 
-/// Returns 1 if finished, 0 otherwise
+/**
+ * @brief Moves joint positions from current positions to target positions.
+ * @param q1_target Target for joint q1.
+ * @param q2_target Target for joint q2.
+ * @param q1_max_step Max for q1.
+ * @param q2_max_step Max for q2.
+ * @returns 1 if finished, 0 otherwise.
+ */
 int step_joint_positions(float q1_target, float q2_target, float q1_max_step, float q2_max_step) {
   // Step q1 towards q1_target by q1_max_step, and the same for q2. Both do not exceed target values.
   float q1_delta, q2_delta;
@@ -124,6 +141,14 @@ int step_joint_positions(float q1_target, float q2_target, float q1_max_step, fl
   return q1_done && q2_done;
 }
 
+/**
+ * @brief Finds speeds at which both q1 and q2 will reach their target at the same time.
+ * @param q1_target Target for q1.
+ * @param q2_target Target for q2.
+ * @param max_speed Maximum speed of movement.
+ * @param q1_speed Reference to q1 speed, which will be set.
+ * @param q2_speed Reference to q2_speed, which will be set.
+ */
 void balance_speed(float q1_target, float q2_target, float max_speed, float &q1_speed, float &q2_speed) {
   // Finds speeds at which both q1 and q2 will reach their target at the same time.
   // If one of the joint speeds is very close to 0, then both speeds are just set to the maximum.
@@ -167,13 +192,17 @@ void (*cur_mode)();                   // The current code to execute in the main
 volatile void (*next_mode)() = NULL;  // Allows interrupts to change the mode (volatile = must reference RAM, so slower but fewer race conditions)
 bool pre = false;                     // True if the mode is just entered
 
-/// Schedules to switch to the next mode, only if another section of code has not yet requested to switch.
+/**
+ * @brief Schedules to switch to the next mode, only if another section of code has not yet requested to switch.
+ */
 void switch_mode(void (*new_mode)()) {
   if (next_mode == NULL) {
     next_mode = new_mode;
   }
 }
-/// Switches the mode regardless of whether another has already requested a switch (useful for emergency stop)
+/**
+ * @brief Switches the mode regardless of whether another has already requested a switch (useful for emergency stop).
+ */
 void force_switch_mode(void (*new_mode)()) {
   next_mode = new_mode;
 }
@@ -192,7 +221,10 @@ void feed_wait_step();     // Waits for user to eat the food. Switches to return
 void return_step();        // Moves arm back to starting position, then switches to wait mode.
 
 // CODE
-
+/**
+ * @brief If the SERVO_VOLTAGE_PIN is under LOW_POWER_VOLTAGE then set to lower power mode.
+ * @see switch_mode
+ */
 bool check_low_power() {
   int val = analogRead(SERVO_VOLTAGE_PIN);
   if (val < LOW_POWER_VOLTAGE) {
@@ -202,6 +234,10 @@ bool check_low_power() {
   return false;
 }
 
+/**
+ * @brief Initial setup for the device.
+ * @see load_profile write_servos
+ */
 void setup() {
   pinMode(DEBUG_PIN, OUTPUT);                  // For oscilloscope debugging
   pinMode(INPUT_PIN, INPUT_PULLUP);            // Button input for scooping
@@ -241,6 +277,10 @@ void setup() {
   Y_CENTER = analogRead(JOY_Y_PIN);
 }
 
+/**
+ * @brief Arduino main loop, which manages modes.
+ * @see check_profile_choice
+ */
 void loop() {
   if (next_mode != NULL) {
     cur_mode = next_mode;
@@ -262,7 +302,10 @@ void loop() {
 }
 
 #pragma region Servo Control
-/// Linearly interpolates from (-pi/2 pi/2) -> (SERVO_MIN_PW SERVO_MAX_PW)
+/**
+ * @brief Linearly interpolates from (-pi/2 pi/2) -> (SERVO_MIN_PW SERVO_MAX_PW)
+ * @param q
+ */
 int map_q_to_pulse_width(float q) {
   // See https://www.desmos.com/calculator/jx9jmkxbzo
   // y = mx + b, where x is an angle from [-pi/2, pi/2], y is a pulse width from SERVO_MIN_PW to SERVO_MAX_PW
@@ -275,6 +318,10 @@ int map_q_to_pulse_width(float q) {
   return m * q + b;
 }
 
+/**
+ * @brief 
+ * @param in_q1
+ */
 void write_q1(float in_q1) {
   // J1 from -PI to 0
   // j1.writeMicroseconds(map_q_to_pulse_width(in_q1 + PI * 0.5)); // Opposite sign
@@ -282,6 +329,10 @@ void write_q1(float in_q1) {
   q1 = in_q1;
 }
 
+/**
+ * @brief 
+ * @param in_q2
+ */
 void write_q2(float in_q2) {
   // J2 from 0 to PI
   // j2.writeMicroseconds(map_q_to_pulse_width(in_q2 - PI * 0.5)); // Opposite sign
@@ -295,7 +346,10 @@ void write_servos(float in_q1, float in_q2) {
 }
 #pragma endregion
 
-// Returns a profile index based on current potentiometer value
+/**
+ * @brief Returns a profile index depending on the current potentiometer value.
+ * @returns A profile index.
+ */
 int check_profile_choice() {
   // Average difference between division centers: 146
   // Center of profile 1: 476
@@ -306,6 +360,10 @@ int check_profile_choice() {
   return idx;
 }
 
+/**
+ * @brief Moves the servos back to the home position, then switches to wait_mode.
+ * @see step_ik_target write_servos switch_mode step_joint_positions check_low_power
+ */
 void move_home_then_wait() {
   if (pre) {
     fk_step = 0;
@@ -326,7 +384,9 @@ void move_home_then_wait() {
   check_low_power();
 }
 
-
+/**
+ * @brief Rotates the plate at a slow speed. On user input, stop the plate and switch to descend step.
+ */
 void wait_mode() {
   // Input pin is pullup, so negative logic (pressed = LOW)
   if (digitalRead(INPUT_PIN) == LOW) {
@@ -373,47 +433,9 @@ void wait_mode() {
   check_low_power();
 }
 
-// ALT WAIT MODE
-// void wait_mode() {
-//   // Input pin is pullup, so negative logic (pressed = LOW)
-//   if (digitalRead(INPUT_PIN) == LOW) {
-//     while(digitalRead(INPUT_PIN) == LOW) {}
-//     int idx = check_profile_choice();
-//     profile = profiles[idx];
-//     switch_mode(rotate_plate_step);
-//   }
-//   if (read_joystick_button()) {
-//     // Wait until joystick button is released
-//     timestamp = millis();
-//     while ((read_joystick_button() && (millis() - timestamp < 10000)) || (millis() - timestamp < 100)) {
-//       if (millis() - timestamp >= 5000) {
-//         digitalWrite(WARNING_LED_PIN, LOW);
-//       } else if (millis() - timestamp >= 1000) {
-//         digitalWrite(WARNING_LED_PIN, HIGH);
-//       }
-//     }
-//     digitalWrite(WARNING_LED_PIN, LOW);
-//     timestamp = millis() - timestamp;
-//     if (timestamp >= 10000) {
-//       reset_profiles();
-//       for (int i = 0; i < 4; i++) {
-//         digitalWrite(WARNING_LED_PIN, HIGH);
-//         delay(125);
-//         digitalWrite(WARNING_LED_PIN, LOW);
-//         delay(125);
-//       }
-//       while (read_joystick_button()) {}
-//     } else if (timestamp > 1000) {
-//       switch_mode(calibration_mode);
-//     } else {
-//       int idx = check_profile_choice();
-//       profile = profiles[idx];
-//       switch_mode(rotate_plate_step);
-//     }
-//   }
-//   check_low_power();
-// }
-
+/**
+ * @brief Lower power mode for the device, which slows down the motors and displays an led warning.
+ */
 void low_power_mode() {
   if (pre) {
     digitalWrite(SERVO_POWER_PWM, 0);
@@ -425,7 +447,9 @@ void low_power_mode() {
   delay(500);
 }
 
-
+/**
+ * @brief Rotates the platform while input is pressed.
+ */
 void rotate_plate_step() {
   if (pre) {
     timestamp = millis();
@@ -444,24 +468,9 @@ void rotate_plate_step() {
   check_low_power();
 }
 
-// ALT ROTATE PLATE
-// void rotate_plate_step() {
-//   if (pre) {
-//     timestamp = millis();
-//   }
-//   // At this point, we are looping while the button is not pressed, so we wait until the button is pressed again to move to scooping
-//   unsigned long elapsed = millis() - timestamp;
-//   // We don't switch until the elapsed time exceeds a certain value to ensure a minimum amount of plate rotation
-//   if ((digitalRead(INPUT_PIN) == LOW || read_joystick_button()) && elapsed > 150) {
-//     // then user has activated input and mode should be switched
-//     DCMotor::set_speed(0);
-//     switch_mode(descend_step);
-//   } else {
-//     DCMotor::set_speed(DC_MOTOR_SPEED);
-//   }
-//   check_low_power();
-// }
-
+/**
+ * @brief Descends to edge of plate. Once motion is complete, switch to scoop step.
+ */
 void descend_step() {
   if (pre) {
     timestamp = millis();
@@ -479,6 +488,9 @@ void descend_step() {
   check_low_power();
 }
 
+/**
+ * @brief Scrapes across plate. Once motion is complete, switch to pre lift step.
+ */
 void scoop_step() {
   static float y_off;
   if (pre) {
@@ -520,6 +532,9 @@ void scoop_step() {
   check_low_power();
 }
 
+/**
+ * @brief Lifts spoon up to user with forward kinematics (sets joint states directly)
+ */
 void lift_step_fk() {
   if (pre) {
     fk_target_q1 = 0.0;
@@ -540,6 +555,9 @@ void lift_step_fk() {
   }
 }
 
+/**
+ * @brief Waits for user to eat the food. Switches to return step on user input.
+ */
 void feed_wait_step() {
   if (digitalRead(INPUT_PIN) == LOW || read_joystick_button()) {
     while (digitalRead(INPUT_PIN) == LOW || read_joystick_button()) {}
@@ -547,6 +565,9 @@ void feed_wait_step() {
   }
 }
 
+/**
+ * @brief Moves arm back to starting position, then switches to wait mode.
+ */
 void return_step() {
   if (pre) {
     ik_target_x = profile.end_x;
@@ -570,6 +591,9 @@ void return_step() {
   }
 }
 
+/**
+ * @brief Calculates scooping up motion for the arm if scoop is cancelled.
+ */
 void cancel_scoop_up_step() {
   if (pre) {
     ik_step = 4;
@@ -594,6 +618,10 @@ void cancel_scoop_up_step() {
   write_servos(q1, q2);
   check_low_power();
 }
+
+/**
+ * @brief Calculates scooping out motion for the arm if scoop is cancelled.
+ */
 void cancel_scoop_out_step() {
   if (pre) {
     ik_step = 4;
@@ -619,6 +647,9 @@ void cancel_scoop_out_step() {
   check_low_power();
 }
 
+/**
+ * @brief Arm makes a nodding motion, used when a profile point is set during calibration mode.
+ */
 void head_nod() {
   float og_q1 = q1;
   float og_q2 = q2;
@@ -632,6 +663,9 @@ void head_nod() {
   delay(250);
 }
 
+/**
+ * @brief Calibration mode for the device, allows users to set keypoints for differently shaped plates and bowls.
+ */
 void calibration_mode() {
   static uint8_t calibration_step = 0;
   static uint8_t profile_index = 0;

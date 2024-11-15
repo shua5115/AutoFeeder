@@ -8,11 +8,19 @@
 
 extern uint16_t X_CENTER, Y_CENTER;
 
-// Returns -1 if left of center, 1 if right of center, 0 if at center
+/**
+ * @brief Returns -1 if left of center, 1 if right of center, 0 if at center.
+ */
 int read_joystick_x();
-// Returns -1 if below of center, 1 if above of center, 0 if at center
+
+/**
+ * @brief Returns -1 if below of center, 1 if above of center, 0 if at center.
+ */
 int read_joystick_y();
 
+/**
+ * Returns 1 if the button is down, 0 if otherwise.
+ */
 int read_joystick_button();
 
 #endif

@@ -1,0 +1,92 @@
+\doxysection{kinematics.\+h File Reference}
+\hypertarget{kinematics_8h}{}\label{kinematics_8h}\index{kinematics.h@{kinematics.h}}
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{kinematics_8h_a2aba12ec3a27c113209e37c6aec56a17}{Q1\+\_\+\+HOME}}~-\/3.\+1415926
+\item 
+\#define \mbox{\hyperlink{kinematics_8h_ac2ced6af91ae46713ed7f06351604581}{Q2\+\_\+\+HOME}}~2.\+1817
+\item 
+\#define \mbox{\hyperlink{kinematics_8h_a0cd7b4b5eb08d9d5b67e5850613e68d0}{HOME\+\_\+X}}~-\/42.\+6424
+\item 
+\#define \mbox{\hyperlink{kinematics_8h_a58ea35da2b4ca88d4605c6a21418cf98}{HOME\+\_\+Y}}~-\/81.\+9152
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+bool \mbox{\hyperlink{kinematics_8h_abf72c3ad0bff57d64ce998efcd110086}{calc\+\_\+fk}} (float \mbox{\hyperlink{_auto_feeder_8ino_a209c65446ca302d32cbb908c4d75f616}{q1}}, float \mbox{\hyperlink{_auto_feeder_8ino_afddca3451c589f7b5928b6dccf8c88ba}{q2}}, float \&x\+\_\+ptr, float \&y\+\_\+ptr)
+\item 
+bool \mbox{\hyperlink{kinematics_8h_a1cfcbc6e1214663208e6735a45e0ec62}{calc\+\_\+ik}} (float x, float y, float \&q1\+\_\+ptr, float \&q2\+\_\+ptr)
+\item 
+bool \mbox{\hyperlink{kinematics_8h_ae00fd6a44ee1227579d283195cf571a7}{constrain\+\_\+ik\+\_\+point}} (float \&x, float \&y)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+const float \mbox{\hyperlink{kinematics_8h_a04a2000d1c2e217d4edb9812fbebb37f}{L1}}
+\item 
+const float \mbox{\hyperlink{kinematics_8h_ac922ced2094e330e1be36ddda8889937}{L2}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\Hypertarget{kinematics_8h_a0cd7b4b5eb08d9d5b67e5850613e68d0}\index{kinematics.h@{kinematics.h}!HOME\_X@{HOME\_X}}
+\index{HOME\_X@{HOME\_X}!kinematics.h@{kinematics.h}}
+\doxysubsubsection{\texorpdfstring{HOME\_X}{HOME\_X}}
+{\footnotesize\ttfamily \label{kinematics_8h_a0cd7b4b5eb08d9d5b67e5850613e68d0} 
+\#define HOME\+\_\+X~-\/42.\+6424}
+
+\Hypertarget{kinematics_8h_a58ea35da2b4ca88d4605c6a21418cf98}\index{kinematics.h@{kinematics.h}!HOME\_Y@{HOME\_Y}}
+\index{HOME\_Y@{HOME\_Y}!kinematics.h@{kinematics.h}}
+\doxysubsubsection{\texorpdfstring{HOME\_Y}{HOME\_Y}}
+{\footnotesize\ttfamily \label{kinematics_8h_a58ea35da2b4ca88d4605c6a21418cf98} 
+\#define HOME\+\_\+Y~-\/81.\+9152}
+
+\Hypertarget{kinematics_8h_a2aba12ec3a27c113209e37c6aec56a17}\index{kinematics.h@{kinematics.h}!Q1\_HOME@{Q1\_HOME}}
+\index{Q1\_HOME@{Q1\_HOME}!kinematics.h@{kinematics.h}}
+\doxysubsubsection{\texorpdfstring{Q1\_HOME}{Q1\_HOME}}
+{\footnotesize\ttfamily \label{kinematics_8h_a2aba12ec3a27c113209e37c6aec56a17} 
+\#define Q1\+\_\+\+HOME~-\/3.\+1415926}
+
+\Hypertarget{kinematics_8h_ac2ced6af91ae46713ed7f06351604581}\index{kinematics.h@{kinematics.h}!Q2\_HOME@{Q2\_HOME}}
+\index{Q2\_HOME@{Q2\_HOME}!kinematics.h@{kinematics.h}}
+\doxysubsubsection{\texorpdfstring{Q2\_HOME}{Q2\_HOME}}
+{\footnotesize\ttfamily \label{kinematics_8h_ac2ced6af91ae46713ed7f06351604581} 
+\#define Q2\+\_\+\+HOME~2.\+1817}
+
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{kinematics_8h_abf72c3ad0bff57d64ce998efcd110086}\index{kinematics.h@{kinematics.h}!calc\_fk@{calc\_fk}}
+\index{calc\_fk@{calc\_fk}!kinematics.h@{kinematics.h}}
+\doxysubsubsection{\texorpdfstring{calc\_fk()}{calc\_fk()}}
+{\footnotesize\ttfamily \label{kinematics_8h_abf72c3ad0bff57d64ce998efcd110086} 
+bool calc\+\_\+fk (\begin{DoxyParamCaption}\item[{float}]{q1}{, }\item[{float}]{q2}{, }\item[{float \&}]{x\+\_\+ptr}{, }\item[{float \&}]{y\+\_\+ptr}{}\end{DoxyParamCaption})}
+
+Calculates forward kinematics for given joint values. Returns whether the kinematic calculation was successful. Places the result of fk into x\+\_\+ptr and y\+\_\+ptr. \Hypertarget{kinematics_8h_a1cfcbc6e1214663208e6735a45e0ec62}\index{kinematics.h@{kinematics.h}!calc\_ik@{calc\_ik}}
+\index{calc\_ik@{calc\_ik}!kinematics.h@{kinematics.h}}
+\doxysubsubsection{\texorpdfstring{calc\_ik()}{calc\_ik()}}
+{\footnotesize\ttfamily \label{kinematics_8h_a1cfcbc6e1214663208e6735a45e0ec62} 
+bool calc\+\_\+ik (\begin{DoxyParamCaption}\item[{float}]{x}{, }\item[{float}]{y}{, }\item[{float \&}]{q1\+\_\+ptr}{, }\item[{float \&}]{q2\+\_\+ptr}{}\end{DoxyParamCaption})}
+
+Calculates inverse kinematics for a given point relative to the robot\textquotesingle{}s origin (the shoulder joint). Returns whether the kinematic calculation was successful. Places the result of ik into q1\+\_\+ptr and q2\+\_\+ptr. \Hypertarget{kinematics_8h_ae00fd6a44ee1227579d283195cf571a7}\index{kinematics.h@{kinematics.h}!constrain\_ik\_point@{constrain\_ik\_point}}
+\index{constrain\_ik\_point@{constrain\_ik\_point}!kinematics.h@{kinematics.h}}
+\doxysubsubsection{\texorpdfstring{constrain\_ik\_point()}{constrain\_ik\_point()}}
+{\footnotesize\ttfamily \label{kinematics_8h_ae00fd6a44ee1227579d283195cf571a7} 
+bool constrain\+\_\+ik\+\_\+point (\begin{DoxyParamCaption}\item[{float \&}]{x}{, }\item[{float \&}]{y}{}\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Variable Documentation}
+\Hypertarget{kinematics_8h_a04a2000d1c2e217d4edb9812fbebb37f}\index{kinematics.h@{kinematics.h}!L1@{L1}}
+\index{L1@{L1}!kinematics.h@{kinematics.h}}
+\doxysubsubsection{\texorpdfstring{L1}{L1}}
+{\footnotesize\ttfamily \label{kinematics_8h_a04a2000d1c2e217d4edb9812fbebb37f} 
+const float L1\hspace{0.3cm}{\ttfamily [extern]}}
+
+\Hypertarget{kinematics_8h_ac922ced2094e330e1be36ddda8889937}\index{kinematics.h@{kinematics.h}!L2@{L2}}
+\index{L2@{L2}!kinematics.h@{kinematics.h}}
+\doxysubsubsection{\texorpdfstring{L2}{L2}}
+{\footnotesize\ttfamily \label{kinematics_8h_ac922ced2094e330e1be36ddda8889937} 
+const float L2\hspace{0.3cm}{\ttfamily [extern]}}
+

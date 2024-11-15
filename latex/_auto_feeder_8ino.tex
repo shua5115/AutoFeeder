@@ -1,0 +1,671 @@
+\doxysection{Auto\+Feeder.\+ino File Reference}
+\hypertarget{_auto_feeder_8ino}{}\label{_auto_feeder_8ino}\index{AutoFeeder.ino@{AutoFeeder.ino}}
+
+
+Main functionality for Auto\+Feeder use.  
+
+
+{\ttfamily \#include $<$Servo.\+h$>$}\newline
+{\ttfamily \#include $<$stdint.\+h$>$}\newline
+{\ttfamily \#include "{}DCMotor.\+h"{}}\newline
+{\ttfamily \#include "{}kinematics.\+h"{}}\newline
+{\ttfamily \#include "{}Profile.\+h"{}}\newline
+{\ttfamily \#include "{}Joystick.\+h"{}}\newline
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{_auto_feeder_8ino_a1a806e0533aa476bb6e62b7d22c93572}{INPUT\+\_\+\+PIN}}~2
+\item 
+\#define \mbox{\hyperlink{_auto_feeder_8ino_aac77b9d8c3b5ebb1caa337b6896c7080}{DEBUG\+\_\+\+PIN}}~4
+\item 
+\#define \mbox{\hyperlink{_auto_feeder_8ino_ab8381d8f87c02fed089f96525195446d}{SERVO\+\_\+\+POWER\+\_\+\+PWM}}~3
+\item 
+\#define \mbox{\hyperlink{_auto_feeder_8ino_ad3d149af1f8538c734b50c9c9891ca78}{SERVO\+\_\+\+POWER\+\_\+\+DIR}}~12
+\item 
+\#define \mbox{\hyperlink{_auto_feeder_8ino_a603033af98a346b732741df36d2b9a46}{WARNING\+\_\+\+LED\+\_\+\+PIN}}~10
+\item 
+\#define \mbox{\hyperlink{_auto_feeder_8ino_a556378ee1474b611d20c0a9a13111fc5}{PROFILE\+\_\+\+POT\+\_\+\+PIN}}~5
+\item 
+\#define \mbox{\hyperlink{_auto_feeder_8ino_a13326f7a2ac2b4438ae76ac70c498ce2}{SERVO\+\_\+\+VOLTAGE\+\_\+\+PIN}}~4
+\item 
+\#define \mbox{\hyperlink{_auto_feeder_8ino_a9d9fbd26dfa294ef5ee65188c5d613c0}{Q\+\_\+\+EPSILON}}~0.\+00001
+\item 
+\#define \mbox{\hyperlink{_auto_feeder_8ino_a82ee37356bf84e55ca09a66547ec4899}{DIST\+\_\+\+EPSILON}}~0.\+001
+\item 
+\#define \mbox{\hyperlink{_auto_feeder_8ino_a35c8c5ae950df1671aadd72b7399b87b}{SERVO\+\_\+\+MIN\+\_\+\+PW}}~544
+\item 
+\#define \mbox{\hyperlink{_auto_feeder_8ino_abc1e38006bc3884eaa4474246e6af162}{SERVO\+\_\+\+MAX\+\_\+\+PW}}~2400
+\item 
+\#define \mbox{\hyperlink{_auto_feeder_8ino_a23b9c9d6a37b0d0e2ceb32775fe7232b}{MAX\+\_\+\+JOINT\+\_\+\+SPEED}}~0.\+0003
+\item 
+\#define \mbox{\hyperlink{_auto_feeder_8ino_a677b7fa68921d026c260feb2b65da528}{DC\+\_\+\+MOTOR\+\_\+\+SPEED}}~255
+\item 
+\#define \mbox{\hyperlink{_auto_feeder_8ino_a2625125113f4a10f657cac4cddcb217b}{IK\+\_\+\+STEP\+\_\+\+SIZE}}~0.\+25
+\item 
+\#define \mbox{\hyperlink{_auto_feeder_8ino_a76cebb41b0b084ce98839c8348dcbb5c}{THRESHOLD\+\_\+\+CURRENT}}~400
+\item 
+\#define \mbox{\hyperlink{_auto_feeder_8ino_a705c65900f70b5a8fc71d4e402e5cd0a}{OVERLOAD\+\_\+\+CURRENT}}~500
+\item 
+\#define \mbox{\hyperlink{_auto_feeder_8ino_a55fc0b52aaad879f8edcc2d4b4fb850d}{LOW\+\_\+\+POWER\+\_\+\+VOLTAGE}}~562
+\item 
+\#define \mbox{\hyperlink{_auto_feeder_8ino_acd814fd49acf7b96673a3463a78d8fa6}{ROTATE\+\_\+\+PLATE\+\_\+\+TIME}}~500
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{_auto_feeder_8ino_ab32989bf512de0bcd796ca70d15cecd4}{step\+\_\+ik\+\_\+target}} (float x\+\_\+target, float y\+\_\+target, float step\+\_\+length)
+\begin{DoxyCompactList}\small\item\em Steps from current ik target towards the target position by a given step length. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{_auto_feeder_8ino_a910e7acdcc51197b12e3192dee1d4139}{step\+\_\+joint\+\_\+positions}} (float q1\+\_\+target, float q2\+\_\+target, float q1\+\_\+max\+\_\+step, float q2\+\_\+max\+\_\+step)
+\begin{DoxyCompactList}\small\item\em Moves joint positions from current positions to target positions. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{_auto_feeder_8ino_a14fbfb03ab8b8871ebd121488bf08c44}{balance\+\_\+speed}} (float q1\+\_\+target, float q2\+\_\+target, float max\+\_\+speed, float \&\mbox{\hyperlink{_auto_feeder_8ino_ab3d49c699125fd80f91106eafc9174fb}{q1\+\_\+speed}}, float \&\mbox{\hyperlink{_auto_feeder_8ino_ab0cedb5a32e8755558450dd3ea0982c0}{q2\+\_\+speed}})
+\begin{DoxyCompactList}\small\item\em Finds speeds at which both q1 and q2 will reach their target at the same time. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{_auto_feeder_8ino_a38a0e48972cfd95ce6d563e07e09fe2c}{switch\+\_\+mode}} (void(\texorpdfstring{$\ast$}{*}new\+\_\+mode)())
+\begin{DoxyCompactList}\small\item\em Schedules to switch to the next mode, only if another section of code has not yet requested to switch. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{_auto_feeder_8ino_a0fd02dd80c20be5bce7c6f055c50b303}{force\+\_\+switch\+\_\+mode}} (void(\texorpdfstring{$\ast$}{*}new\+\_\+mode)())
+\begin{DoxyCompactList}\small\item\em Switches the mode regardless of whether another has already requested a switch (useful for emergency stop). \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{_auto_feeder_8ino_ac16abf05bbd62e09beafbe19cfbca589}{move\+\_\+home\+\_\+then\+\_\+wait}} ()
+\begin{DoxyCompactList}\small\item\em The arm fully extends and waits for user input. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{_auto_feeder_8ino_ad17448e76d8607d61084870aeb30a6a5}{wait\+\_\+mode}} ()
+\begin{DoxyCompactList}\small\item\em The arm is primed back to scoop, waiting for user input. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{_auto_feeder_8ino_a4026516ca7d479e5e236f7f08dee1fa1}{calibration\+\_\+mode}} ()
+\item 
+void \mbox{\hyperlink{_auto_feeder_8ino_a0f01d7ad439eee754990ba4bfecb0ae1}{low\+\_\+power\+\_\+mode}} ()
+\item 
+void \mbox{\hyperlink{_auto_feeder_8ino_ad4a893016e03e4e2c70726caef3ef82d}{rotate\+\_\+plate\+\_\+step}} ()
+\begin{DoxyCompactList}\small\item\em Rotates the platform while input is pressed. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{_auto_feeder_8ino_a860980a69b34eab7d9d69405d45d8618}{descend\+\_\+step}} ()
+\begin{DoxyCompactList}\small\item\em The arm descends, starting the scoop motion. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{_auto_feeder_8ino_a0699433151e8271bc8de05da43a9a907}{scoop\+\_\+step}} ()
+\item 
+void \mbox{\hyperlink{_auto_feeder_8ino_a1838c2899f3fd17d9ba382342f5d919b}{lift\+\_\+step\+\_\+fk}} ()
+\item 
+void \mbox{\hyperlink{_auto_feeder_8ino_a6920876621782b6a015a317cf13e7ac5}{feed\+\_\+wait\+\_\+step}} ()
+\item 
+void \mbox{\hyperlink{_auto_feeder_8ino_add14bcf913ec9380fc5f53bb4687d7b6}{return\+\_\+step}} ()
+\item 
+bool \mbox{\hyperlink{_auto_feeder_8ino_adbac40e579bbb03ca22cf4a414eca5ab}{check\+\_\+low\+\_\+power}} ()
+\begin{DoxyCompactList}\small\item\em If the SERVO\+\_\+\+VOLTAGE\+\_\+\+PIN is under LOW\+\_\+\+POWER\+\_\+\+VOLTAGE then set to lower power mode. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{_auto_feeder_8ino_a4fc01d736fe50cf5b977f755b675f11d}{setup}} ()
+\begin{DoxyCompactList}\small\item\em Initial setup for the device. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{_auto_feeder_8ino_afe461d27b9c48d5921c00d521181f12f}{loop}} ()
+\begin{DoxyCompactList}\small\item\em Arduino main loop, which manages modes. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{_auto_feeder_8ino_a6febc335a7b499bf45096fbd4c751bf3}{map\+\_\+q\+\_\+to\+\_\+pulse\+\_\+width}} (float q)
+\begin{DoxyCompactList}\small\item\em Linearly interpolates from (-\/pi/2 pi/2) -\/\texorpdfstring{$>$}{>} (SERVO\+\_\+\+MIN\+\_\+\+PW SERVO\+\_\+\+MAX\+\_\+\+PW) \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{_auto_feeder_8ino_a0fa1a0d4a6c61e546250248def2a1a6e}{write\+\_\+q1}} (float in\+\_\+q1)
+\item 
+void \mbox{\hyperlink{_auto_feeder_8ino_accdbe6e4b1eebc2880a0d48783b7f076}{write\+\_\+q2}} (float in\+\_\+q2)
+\item 
+void \mbox{\hyperlink{_auto_feeder_8ino_a91f88d256d4225e30a2ddd585e10c067}{write\+\_\+servos}} (float in\+\_\+q1, float in\+\_\+q2)
+\item 
+int \mbox{\hyperlink{_auto_feeder_8ino_ab8af4ea0b1b9782d36a3726995e37d9c}{check\+\_\+profile\+\_\+choice}} ()
+\item 
+void \mbox{\hyperlink{_auto_feeder_8ino_addc880601b9e5f74269cfce2bfcbc29e}{cancel\+\_\+scoop\+\_\+up\+\_\+step}} ()
+\item 
+void \mbox{\hyperlink{_auto_feeder_8ino_a17bb0bd926b8960397e5c6e584b1b30b}{cancel\+\_\+scoop\+\_\+out\+\_\+step}} ()
+\item 
+void \mbox{\hyperlink{_auto_feeder_8ino_a194a5eb9be5e9a0ca4a0d6094d64bea8}{head\+\_\+nod}} ()
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+const float \mbox{\hyperlink{_auto_feeder_8ino_a04a2000d1c2e217d4edb9812fbebb37f}{L1}} = 100.\+0
+\item 
+const float \mbox{\hyperlink{_auto_feeder_8ino_ac922ced2094e330e1be36ddda8889937}{L2}} = 100.\+0
+\item 
+\mbox{\hyperlink{struct_profile}{Profile}} \mbox{\hyperlink{_auto_feeder_8ino_affb50191e4f0bf8af2b7014aef24250a}{profile}} = \mbox{\hyperlink{_profile_8cpp_a060804bdb06901e79d27172a5837fc6a}{profiles}}\mbox{[}0\mbox{]}
+\item 
+int \mbox{\hyperlink{_auto_feeder_8ino_a2a077f8518ecd673261e98d8f663723d}{profile\+\_\+idx}} = 0
+\item 
+unsigned long \mbox{\hyperlink{_auto_feeder_8ino_acba7776dcc1861edfe0e9c5736de4df8}{timestamp}}
+\item 
+Servo \mbox{\hyperlink{_auto_feeder_8ino_a5014205f00c8203e4fb2445385930fc4}{j1}}
+\item 
+Servo \mbox{\hyperlink{_auto_feeder_8ino_ace06684f1ceea7ac8092598f7e85b736}{j2}}
+\item 
+uint16\+\_\+t \mbox{\hyperlink{_auto_feeder_8ino_a954240e5977314fe6063fe54c4410839}{X\+\_\+\+CENTER}}
+\item 
+uint16\+\_\+t \mbox{\hyperlink{_auto_feeder_8ino_aae6ddd65987ec2dc162bfaf6c8dcc992}{Y\+\_\+\+CENTER}}
+\item 
+float \mbox{\hyperlink{_auto_feeder_8ino_a209c65446ca302d32cbb908c4d75f616}{q1}} = 0
+\item 
+float \mbox{\hyperlink{_auto_feeder_8ino_afddca3451c589f7b5928b6dccf8c88ba}{q2}} = 0
+\item 
+float \mbox{\hyperlink{_auto_feeder_8ino_ab3d49c699125fd80f91106eafc9174fb}{q1\+\_\+speed}} = 0
+\item 
+float \mbox{\hyperlink{_auto_feeder_8ino_ab0cedb5a32e8755558450dd3ea0982c0}{q2\+\_\+speed}} = 0
+\item 
+float \mbox{\hyperlink{_auto_feeder_8ino_a261a30951a01f17c5401357a0b2801f2}{fk\+\_\+target\+\_\+q1}} = 0
+\item 
+float \mbox{\hyperlink{_auto_feeder_8ino_a895e7454f597aba7d9e9a00a54f3c28e}{fk\+\_\+target\+\_\+q2}} = 0
+\item 
+float \mbox{\hyperlink{_auto_feeder_8ino_a03cb91fbc726d9864c767964a3398ed1}{ik\+\_\+target\+\_\+x}} = \mbox{\hyperlink{_auto_feeder_8ino_a04a2000d1c2e217d4edb9812fbebb37f}{L1}} + \mbox{\hyperlink{_auto_feeder_8ino_ac922ced2094e330e1be36ddda8889937}{L2}}
+\item 
+float \mbox{\hyperlink{_auto_feeder_8ino_a5344258704e541d479966ad9bf4e2211}{ik\+\_\+target\+\_\+y}} = 0
+\item 
+size\+\_\+t \mbox{\hyperlink{_auto_feeder_8ino_a617f9ad9ab6191ca6a0339a571e2faa2}{fk\+\_\+step}} = 0
+\item 
+size\+\_\+t \mbox{\hyperlink{_auto_feeder_8ino_aaeac97bfd2e932a93b72efddee0002c1}{ik\+\_\+step}} = 0
+\item 
+uint8\+\_\+t \mbox{\hyperlink{_auto_feeder_8ino_abea74ec9b1a826a0de96c8714ea31e48}{prev\+\_\+profile\+\_\+idx}} = 0
+\item 
+void(\texorpdfstring{$\ast$}{*} \mbox{\hyperlink{_auto_feeder_8ino_a558cd45937e7a92847353c66fee13c98}{cur\+\_\+mode}} )()
+\item 
+volatile void(\texorpdfstring{$\ast$}{*} \mbox{\hyperlink{_auto_feeder_8ino_a61df98d240a4cf294c9456e6241eac68}{next\+\_\+mode}} )() = NULL
+\item 
+bool \mbox{\hyperlink{_auto_feeder_8ino_afdafdd56c00a3851656be918b3aa1dd0}{pre}} = false
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Main functionality for Auto\+Feeder use. 
+
+
+
+\doxysubsection{Macro Definition Documentation}
+\Hypertarget{_auto_feeder_8ino_a677b7fa68921d026c260feb2b65da528}\index{AutoFeeder.ino@{AutoFeeder.ino}!DC\_MOTOR\_SPEED@{DC\_MOTOR\_SPEED}}
+\index{DC\_MOTOR\_SPEED@{DC\_MOTOR\_SPEED}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{DC\_MOTOR\_SPEED}{DC\_MOTOR\_SPEED}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a677b7fa68921d026c260feb2b65da528} 
+\#define DC\+\_\+\+MOTOR\+\_\+\+SPEED~255}
+
+\Hypertarget{_auto_feeder_8ino_aac77b9d8c3b5ebb1caa337b6896c7080}\index{AutoFeeder.ino@{AutoFeeder.ino}!DEBUG\_PIN@{DEBUG\_PIN}}
+\index{DEBUG\_PIN@{DEBUG\_PIN}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{DEBUG\_PIN}{DEBUG\_PIN}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_aac77b9d8c3b5ebb1caa337b6896c7080} 
+\#define DEBUG\+\_\+\+PIN~4}
+
+\Hypertarget{_auto_feeder_8ino_a82ee37356bf84e55ca09a66547ec4899}\index{AutoFeeder.ino@{AutoFeeder.ino}!DIST\_EPSILON@{DIST\_EPSILON}}
+\index{DIST\_EPSILON@{DIST\_EPSILON}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{DIST\_EPSILON}{DIST\_EPSILON}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a82ee37356bf84e55ca09a66547ec4899} 
+\#define DIST\+\_\+\+EPSILON~0.\+001}
+
+\Hypertarget{_auto_feeder_8ino_a2625125113f4a10f657cac4cddcb217b}\index{AutoFeeder.ino@{AutoFeeder.ino}!IK\_STEP\_SIZE@{IK\_STEP\_SIZE}}
+\index{IK\_STEP\_SIZE@{IK\_STEP\_SIZE}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{IK\_STEP\_SIZE}{IK\_STEP\_SIZE}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a2625125113f4a10f657cac4cddcb217b} 
+\#define IK\+\_\+\+STEP\+\_\+\+SIZE~0.\+25}
+
+\Hypertarget{_auto_feeder_8ino_a1a806e0533aa476bb6e62b7d22c93572}\index{AutoFeeder.ino@{AutoFeeder.ino}!INPUT\_PIN@{INPUT\_PIN}}
+\index{INPUT\_PIN@{INPUT\_PIN}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{INPUT\_PIN}{INPUT\_PIN}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a1a806e0533aa476bb6e62b7d22c93572} 
+\#define INPUT\+\_\+\+PIN~2}
+
+\Hypertarget{_auto_feeder_8ino_a55fc0b52aaad879f8edcc2d4b4fb850d}\index{AutoFeeder.ino@{AutoFeeder.ino}!LOW\_POWER\_VOLTAGE@{LOW\_POWER\_VOLTAGE}}
+\index{LOW\_POWER\_VOLTAGE@{LOW\_POWER\_VOLTAGE}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{LOW\_POWER\_VOLTAGE}{LOW\_POWER\_VOLTAGE}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a55fc0b52aaad879f8edcc2d4b4fb850d} 
+\#define LOW\+\_\+\+POWER\+\_\+\+VOLTAGE~562}
+
+\Hypertarget{_auto_feeder_8ino_a23b9c9d6a37b0d0e2ceb32775fe7232b}\index{AutoFeeder.ino@{AutoFeeder.ino}!MAX\_JOINT\_SPEED@{MAX\_JOINT\_SPEED}}
+\index{MAX\_JOINT\_SPEED@{MAX\_JOINT\_SPEED}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{MAX\_JOINT\_SPEED}{MAX\_JOINT\_SPEED}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a23b9c9d6a37b0d0e2ceb32775fe7232b} 
+\#define MAX\+\_\+\+JOINT\+\_\+\+SPEED~0.\+0003}
+
+\Hypertarget{_auto_feeder_8ino_a705c65900f70b5a8fc71d4e402e5cd0a}\index{AutoFeeder.ino@{AutoFeeder.ino}!OVERLOAD\_CURRENT@{OVERLOAD\_CURRENT}}
+\index{OVERLOAD\_CURRENT@{OVERLOAD\_CURRENT}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{OVERLOAD\_CURRENT}{OVERLOAD\_CURRENT}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a705c65900f70b5a8fc71d4e402e5cd0a} 
+\#define OVERLOAD\+\_\+\+CURRENT~500}
+
+\Hypertarget{_auto_feeder_8ino_a556378ee1474b611d20c0a9a13111fc5}\index{AutoFeeder.ino@{AutoFeeder.ino}!PROFILE\_POT\_PIN@{PROFILE\_POT\_PIN}}
+\index{PROFILE\_POT\_PIN@{PROFILE\_POT\_PIN}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{PROFILE\_POT\_PIN}{PROFILE\_POT\_PIN}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a556378ee1474b611d20c0a9a13111fc5} 
+\#define PROFILE\+\_\+\+POT\+\_\+\+PIN~5}
+
+\Hypertarget{_auto_feeder_8ino_a9d9fbd26dfa294ef5ee65188c5d613c0}\index{AutoFeeder.ino@{AutoFeeder.ino}!Q\_EPSILON@{Q\_EPSILON}}
+\index{Q\_EPSILON@{Q\_EPSILON}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{Q\_EPSILON}{Q\_EPSILON}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a9d9fbd26dfa294ef5ee65188c5d613c0} 
+\#define Q\+\_\+\+EPSILON~0.\+00001}
+
+\Hypertarget{_auto_feeder_8ino_acd814fd49acf7b96673a3463a78d8fa6}\index{AutoFeeder.ino@{AutoFeeder.ino}!ROTATE\_PLATE\_TIME@{ROTATE\_PLATE\_TIME}}
+\index{ROTATE\_PLATE\_TIME@{ROTATE\_PLATE\_TIME}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{ROTATE\_PLATE\_TIME}{ROTATE\_PLATE\_TIME}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_acd814fd49acf7b96673a3463a78d8fa6} 
+\#define ROTATE\+\_\+\+PLATE\+\_\+\+TIME~500}
+
+\Hypertarget{_auto_feeder_8ino_abc1e38006bc3884eaa4474246e6af162}\index{AutoFeeder.ino@{AutoFeeder.ino}!SERVO\_MAX\_PW@{SERVO\_MAX\_PW}}
+\index{SERVO\_MAX\_PW@{SERVO\_MAX\_PW}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{SERVO\_MAX\_PW}{SERVO\_MAX\_PW}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_abc1e38006bc3884eaa4474246e6af162} 
+\#define SERVO\+\_\+\+MAX\+\_\+\+PW~2400}
+
+\Hypertarget{_auto_feeder_8ino_a35c8c5ae950df1671aadd72b7399b87b}\index{AutoFeeder.ino@{AutoFeeder.ino}!SERVO\_MIN\_PW@{SERVO\_MIN\_PW}}
+\index{SERVO\_MIN\_PW@{SERVO\_MIN\_PW}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{SERVO\_MIN\_PW}{SERVO\_MIN\_PW}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a35c8c5ae950df1671aadd72b7399b87b} 
+\#define SERVO\+\_\+\+MIN\+\_\+\+PW~544}
+
+\Hypertarget{_auto_feeder_8ino_ad3d149af1f8538c734b50c9c9891ca78}\index{AutoFeeder.ino@{AutoFeeder.ino}!SERVO\_POWER\_DIR@{SERVO\_POWER\_DIR}}
+\index{SERVO\_POWER\_DIR@{SERVO\_POWER\_DIR}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{SERVO\_POWER\_DIR}{SERVO\_POWER\_DIR}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_ad3d149af1f8538c734b50c9c9891ca78} 
+\#define SERVO\+\_\+\+POWER\+\_\+\+DIR~12}
+
+\Hypertarget{_auto_feeder_8ino_ab8381d8f87c02fed089f96525195446d}\index{AutoFeeder.ino@{AutoFeeder.ino}!SERVO\_POWER\_PWM@{SERVO\_POWER\_PWM}}
+\index{SERVO\_POWER\_PWM@{SERVO\_POWER\_PWM}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{SERVO\_POWER\_PWM}{SERVO\_POWER\_PWM}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_ab8381d8f87c02fed089f96525195446d} 
+\#define SERVO\+\_\+\+POWER\+\_\+\+PWM~3}
+
+\Hypertarget{_auto_feeder_8ino_a13326f7a2ac2b4438ae76ac70c498ce2}\index{AutoFeeder.ino@{AutoFeeder.ino}!SERVO\_VOLTAGE\_PIN@{SERVO\_VOLTAGE\_PIN}}
+\index{SERVO\_VOLTAGE\_PIN@{SERVO\_VOLTAGE\_PIN}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{SERVO\_VOLTAGE\_PIN}{SERVO\_VOLTAGE\_PIN}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a13326f7a2ac2b4438ae76ac70c498ce2} 
+\#define SERVO\+\_\+\+VOLTAGE\+\_\+\+PIN~4}
+
+\Hypertarget{_auto_feeder_8ino_a76cebb41b0b084ce98839c8348dcbb5c}\index{AutoFeeder.ino@{AutoFeeder.ino}!THRESHOLD\_CURRENT@{THRESHOLD\_CURRENT}}
+\index{THRESHOLD\_CURRENT@{THRESHOLD\_CURRENT}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{THRESHOLD\_CURRENT}{THRESHOLD\_CURRENT}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a76cebb41b0b084ce98839c8348dcbb5c} 
+\#define THRESHOLD\+\_\+\+CURRENT~400}
+
+\Hypertarget{_auto_feeder_8ino_a603033af98a346b732741df36d2b9a46}\index{AutoFeeder.ino@{AutoFeeder.ino}!WARNING\_LED\_PIN@{WARNING\_LED\_PIN}}
+\index{WARNING\_LED\_PIN@{WARNING\_LED\_PIN}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{WARNING\_LED\_PIN}{WARNING\_LED\_PIN}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a603033af98a346b732741df36d2b9a46} 
+\#define WARNING\+\_\+\+LED\+\_\+\+PIN~10}
+
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{_auto_feeder_8ino_a14fbfb03ab8b8871ebd121488bf08c44}\index{AutoFeeder.ino@{AutoFeeder.ino}!balance\_speed@{balance\_speed}}
+\index{balance\_speed@{balance\_speed}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{balance\_speed()}{balance\_speed()}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a14fbfb03ab8b8871ebd121488bf08c44} 
+void balance\+\_\+speed (\begin{DoxyParamCaption}\item[{float}]{q1\+\_\+target}{, }\item[{float}]{q2\+\_\+target}{, }\item[{float}]{max\+\_\+speed}{, }\item[{float \&}]{q1\+\_\+speed}{, }\item[{float \&}]{q2\+\_\+speed}{}\end{DoxyParamCaption})}
+
+
+
+Finds speeds at which both q1 and q2 will reach their target at the same time. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em q1\+\_\+target} & Target for q1. \\
+\hline
+{\em q2\+\_\+target} & Target for q2. \\
+\hline
+{\em max\+\_\+speed} & Maximum speed of movement. \\
+\hline
+{\em q1\+\_\+speed} & Reference to q1 speed, which will be set. \\
+\hline
+{\em q2\+\_\+speed} & Reference to q2\+\_\+speed, which will be set. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{_auto_feeder_8ino_a4026516ca7d479e5e236f7f08dee1fa1}\index{AutoFeeder.ino@{AutoFeeder.ino}!calibration\_mode@{calibration\_mode}}
+\index{calibration\_mode@{calibration\_mode}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{calibration\_mode()}{calibration\_mode()}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a4026516ca7d479e5e236f7f08dee1fa1} 
+void calibration\+\_\+mode (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\Hypertarget{_auto_feeder_8ino_a17bb0bd926b8960397e5c6e584b1b30b}\index{AutoFeeder.ino@{AutoFeeder.ino}!cancel\_scoop\_out\_step@{cancel\_scoop\_out\_step}}
+\index{cancel\_scoop\_out\_step@{cancel\_scoop\_out\_step}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{cancel\_scoop\_out\_step()}{cancel\_scoop\_out\_step()}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a17bb0bd926b8960397e5c6e584b1b30b} 
+void cancel\+\_\+scoop\+\_\+out\+\_\+step (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\Hypertarget{_auto_feeder_8ino_addc880601b9e5f74269cfce2bfcbc29e}\index{AutoFeeder.ino@{AutoFeeder.ino}!cancel\_scoop\_up\_step@{cancel\_scoop\_up\_step}}
+\index{cancel\_scoop\_up\_step@{cancel\_scoop\_up\_step}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{cancel\_scoop\_up\_step()}{cancel\_scoop\_up\_step()}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_addc880601b9e5f74269cfce2bfcbc29e} 
+void cancel\+\_\+scoop\+\_\+up\+\_\+step (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\Hypertarget{_auto_feeder_8ino_adbac40e579bbb03ca22cf4a414eca5ab}\index{AutoFeeder.ino@{AutoFeeder.ino}!check\_low\_power@{check\_low\_power}}
+\index{check\_low\_power@{check\_low\_power}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{check\_low\_power()}{check\_low\_power()}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_adbac40e579bbb03ca22cf4a414eca5ab} 
+bool check\+\_\+low\+\_\+power (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+If the SERVO\+\_\+\+VOLTAGE\+\_\+\+PIN is under LOW\+\_\+\+POWER\+\_\+\+VOLTAGE then set to lower power mode. 
+
+\begin{DoxySeeAlso}{See also}
+\doxylink{_auto_feeder_8ino_a38a0e48972cfd95ce6d563e07e09fe2c}{switch\+\_\+mode} 
+\end{DoxySeeAlso}
+\Hypertarget{_auto_feeder_8ino_ab8af4ea0b1b9782d36a3726995e37d9c}\index{AutoFeeder.ino@{AutoFeeder.ino}!check\_profile\_choice@{check\_profile\_choice}}
+\index{check\_profile\_choice@{check\_profile\_choice}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{check\_profile\_choice()}{check\_profile\_choice()}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_ab8af4ea0b1b9782d36a3726995e37d9c} 
+int check\+\_\+profile\+\_\+choice (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\Hypertarget{_auto_feeder_8ino_a860980a69b34eab7d9d69405d45d8618}\index{AutoFeeder.ino@{AutoFeeder.ino}!descend\_step@{descend\_step}}
+\index{descend\_step@{descend\_step}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{descend\_step()}{descend\_step()}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a860980a69b34eab7d9d69405d45d8618} 
+void descend\+\_\+step (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+The arm descends, starting the scoop motion. 
+
+\Hypertarget{_auto_feeder_8ino_a6920876621782b6a015a317cf13e7ac5}\index{AutoFeeder.ino@{AutoFeeder.ino}!feed\_wait\_step@{feed\_wait\_step}}
+\index{feed\_wait\_step@{feed\_wait\_step}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{feed\_wait\_step()}{feed\_wait\_step()}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a6920876621782b6a015a317cf13e7ac5} 
+void feed\+\_\+wait\+\_\+step (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\Hypertarget{_auto_feeder_8ino_a0fd02dd80c20be5bce7c6f055c50b303}\index{AutoFeeder.ino@{AutoFeeder.ino}!force\_switch\_mode@{force\_switch\_mode}}
+\index{force\_switch\_mode@{force\_switch\_mode}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{force\_switch\_mode()}{force\_switch\_mode()}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a0fd02dd80c20be5bce7c6f055c50b303} 
+void force\+\_\+switch\+\_\+mode (\begin{DoxyParamCaption}\item[{void(\texorpdfstring{$\ast$}{*}}]{new\+\_\+mode~}{)()}\end{DoxyParamCaption})}
+
+
+
+Switches the mode regardless of whether another has already requested a switch (useful for emergency stop). 
+
+\Hypertarget{_auto_feeder_8ino_a194a5eb9be5e9a0ca4a0d6094d64bea8}\index{AutoFeeder.ino@{AutoFeeder.ino}!head\_nod@{head\_nod}}
+\index{head\_nod@{head\_nod}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{head\_nod()}{head\_nod()}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a194a5eb9be5e9a0ca4a0d6094d64bea8} 
+void head\+\_\+nod (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\Hypertarget{_auto_feeder_8ino_a1838c2899f3fd17d9ba382342f5d919b}\index{AutoFeeder.ino@{AutoFeeder.ino}!lift\_step\_fk@{lift\_step\_fk}}
+\index{lift\_step\_fk@{lift\_step\_fk}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{lift\_step\_fk()}{lift\_step\_fk()}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a1838c2899f3fd17d9ba382342f5d919b} 
+void lift\+\_\+step\+\_\+fk (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\Hypertarget{_auto_feeder_8ino_afe461d27b9c48d5921c00d521181f12f}\index{AutoFeeder.ino@{AutoFeeder.ino}!loop@{loop}}
+\index{loop@{loop}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{loop()}{loop()}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_afe461d27b9c48d5921c00d521181f12f} 
+void loop (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Arduino main loop, which manages modes. 
+
+\Hypertarget{_auto_feeder_8ino_a0f01d7ad439eee754990ba4bfecb0ae1}\index{AutoFeeder.ino@{AutoFeeder.ino}!low\_power\_mode@{low\_power\_mode}}
+\index{low\_power\_mode@{low\_power\_mode}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{low\_power\_mode()}{low\_power\_mode()}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a0f01d7ad439eee754990ba4bfecb0ae1} 
+void low\+\_\+power\+\_\+mode (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\Hypertarget{_auto_feeder_8ino_a6febc335a7b499bf45096fbd4c751bf3}\index{AutoFeeder.ino@{AutoFeeder.ino}!map\_q\_to\_pulse\_width@{map\_q\_to\_pulse\_width}}
+\index{map\_q\_to\_pulse\_width@{map\_q\_to\_pulse\_width}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{map\_q\_to\_pulse\_width()}{map\_q\_to\_pulse\_width()}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a6febc335a7b499bf45096fbd4c751bf3} 
+int map\+\_\+q\+\_\+to\+\_\+pulse\+\_\+width (\begin{DoxyParamCaption}\item[{float}]{q}{}\end{DoxyParamCaption})}
+
+
+
+Linearly interpolates from (-\/pi/2 pi/2) -\/\texorpdfstring{$>$}{>} (SERVO\+\_\+\+MIN\+\_\+\+PW SERVO\+\_\+\+MAX\+\_\+\+PW) 
+
+\Hypertarget{_auto_feeder_8ino_ac16abf05bbd62e09beafbe19cfbca589}\index{AutoFeeder.ino@{AutoFeeder.ino}!move\_home\_then\_wait@{move\_home\_then\_wait}}
+\index{move\_home\_then\_wait@{move\_home\_then\_wait}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{move\_home\_then\_wait()}{move\_home\_then\_wait()}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_ac16abf05bbd62e09beafbe19cfbca589} 
+void move\+\_\+home\+\_\+then\+\_\+wait (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+The arm fully extends and waits for user input. 
+
+Different modes that the autofeeder can be in. \Hypertarget{_auto_feeder_8ino_add14bcf913ec9380fc5f53bb4687d7b6}\index{AutoFeeder.ino@{AutoFeeder.ino}!return\_step@{return\_step}}
+\index{return\_step@{return\_step}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{return\_step()}{return\_step()}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_add14bcf913ec9380fc5f53bb4687d7b6} 
+void return\+\_\+step (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\Hypertarget{_auto_feeder_8ino_ad4a893016e03e4e2c70726caef3ef82d}\index{AutoFeeder.ino@{AutoFeeder.ino}!rotate\_plate\_step@{rotate\_plate\_step}}
+\index{rotate\_plate\_step@{rotate\_plate\_step}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{rotate\_plate\_step()}{rotate\_plate\_step()}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_ad4a893016e03e4e2c70726caef3ef82d} 
+void rotate\+\_\+plate\+\_\+step (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Rotates the platform while input is pressed. 
+
+\Hypertarget{_auto_feeder_8ino_a0699433151e8271bc8de05da43a9a907}\index{AutoFeeder.ino@{AutoFeeder.ino}!scoop\_step@{scoop\_step}}
+\index{scoop\_step@{scoop\_step}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{scoop\_step()}{scoop\_step()}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a0699433151e8271bc8de05da43a9a907} 
+void scoop\+\_\+step (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\Hypertarget{_auto_feeder_8ino_a4fc01d736fe50cf5b977f755b675f11d}\index{AutoFeeder.ino@{AutoFeeder.ino}!setup@{setup}}
+\index{setup@{setup}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{setup()}{setup()}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a4fc01d736fe50cf5b977f755b675f11d} 
+void setup (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Initial setup for the device. 
+
+\begin{DoxySeeAlso}{See also}
+\doxylink{_profile_8cpp_ae6aa45c7c83ff9fa09d9a6e670031156}{load\+\_\+profile} 
+
+\doxylink{_auto_feeder_8ino_a91f88d256d4225e30a2ddd585e10c067}{write\+\_\+servos} 
+\end{DoxySeeAlso}
+\Hypertarget{_auto_feeder_8ino_ab32989bf512de0bcd796ca70d15cecd4}\index{AutoFeeder.ino@{AutoFeeder.ino}!step\_ik\_target@{step\_ik\_target}}
+\index{step\_ik\_target@{step\_ik\_target}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{step\_ik\_target()}{step\_ik\_target()}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_ab32989bf512de0bcd796ca70d15cecd4} 
+int step\+\_\+ik\+\_\+target (\begin{DoxyParamCaption}\item[{float}]{x\+\_\+target}{, }\item[{float}]{y\+\_\+target}{, }\item[{float}]{step\+\_\+length}{}\end{DoxyParamCaption})}
+
+
+
+Steps from current ik target towards the target position by a given step length. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em x\+\_\+target} & Target for x-\/coordinate. \\
+\hline
+{\em y\+\_\+target} & Target for y-\/coordinate. \\
+\hline
+{\em step\+\_\+length} & The incremental step length to get to ik target. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+1 if finished, 0 otherwise. 
+\end{DoxyReturn}
+\Hypertarget{_auto_feeder_8ino_a910e7acdcc51197b12e3192dee1d4139}\index{AutoFeeder.ino@{AutoFeeder.ino}!step\_joint\_positions@{step\_joint\_positions}}
+\index{step\_joint\_positions@{step\_joint\_positions}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{step\_joint\_positions()}{step\_joint\_positions()}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a910e7acdcc51197b12e3192dee1d4139} 
+int step\+\_\+joint\+\_\+positions (\begin{DoxyParamCaption}\item[{float}]{q1\+\_\+target}{, }\item[{float}]{q2\+\_\+target}{, }\item[{float}]{q1\+\_\+max\+\_\+step}{, }\item[{float}]{q2\+\_\+max\+\_\+step}{}\end{DoxyParamCaption})}
+
+
+
+Moves joint positions from current positions to target positions. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em q1\+\_\+target} & Target for joint q1. \\
+\hline
+{\em q2\+\_\+target} & Target for joint q2. \\
+\hline
+{\em q1\+\_\+max\+\_\+step} & Max for q1. \\
+\hline
+{\em q2\+\_\+max\+\_\+step} & Max for q2. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+1 if finished, 0 otherwise. 
+\end{DoxyReturn}
+\Hypertarget{_auto_feeder_8ino_a38a0e48972cfd95ce6d563e07e09fe2c}\index{AutoFeeder.ino@{AutoFeeder.ino}!switch\_mode@{switch\_mode}}
+\index{switch\_mode@{switch\_mode}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{switch\_mode()}{switch\_mode()}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a38a0e48972cfd95ce6d563e07e09fe2c} 
+void switch\+\_\+mode (\begin{DoxyParamCaption}\item[{void(\texorpdfstring{$\ast$}{*}}]{new\+\_\+mode~}{)()}\end{DoxyParamCaption})}
+
+
+
+Schedules to switch to the next mode, only if another section of code has not yet requested to switch. 
+
+\Hypertarget{_auto_feeder_8ino_ad17448e76d8607d61084870aeb30a6a5}\index{AutoFeeder.ino@{AutoFeeder.ino}!wait\_mode@{wait\_mode}}
+\index{wait\_mode@{wait\_mode}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{wait\_mode()}{wait\_mode()}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_ad17448e76d8607d61084870aeb30a6a5} 
+void wait\+\_\+mode (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+The arm is primed back to scoop, waiting for user input. 
+
+\Hypertarget{_auto_feeder_8ino_a0fa1a0d4a6c61e546250248def2a1a6e}\index{AutoFeeder.ino@{AutoFeeder.ino}!write\_q1@{write\_q1}}
+\index{write\_q1@{write\_q1}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{write\_q1()}{write\_q1()}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a0fa1a0d4a6c61e546250248def2a1a6e} 
+void write\+\_\+q1 (\begin{DoxyParamCaption}\item[{float}]{in\+\_\+q1}{}\end{DoxyParamCaption})}
+
+\Hypertarget{_auto_feeder_8ino_accdbe6e4b1eebc2880a0d48783b7f076}\index{AutoFeeder.ino@{AutoFeeder.ino}!write\_q2@{write\_q2}}
+\index{write\_q2@{write\_q2}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{write\_q2()}{write\_q2()}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_accdbe6e4b1eebc2880a0d48783b7f076} 
+void write\+\_\+q2 (\begin{DoxyParamCaption}\item[{float}]{in\+\_\+q2}{}\end{DoxyParamCaption})}
+
+\Hypertarget{_auto_feeder_8ino_a91f88d256d4225e30a2ddd585e10c067}\index{AutoFeeder.ino@{AutoFeeder.ino}!write\_servos@{write\_servos}}
+\index{write\_servos@{write\_servos}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{write\_servos()}{write\_servos()}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a91f88d256d4225e30a2ddd585e10c067} 
+void write\+\_\+servos (\begin{DoxyParamCaption}\item[{float}]{in\+\_\+q1}{, }\item[{float}]{in\+\_\+q2}{}\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Variable Documentation}
+\Hypertarget{_auto_feeder_8ino_a558cd45937e7a92847353c66fee13c98}\index{AutoFeeder.ino@{AutoFeeder.ino}!cur\_mode@{cur\_mode}}
+\index{cur\_mode@{cur\_mode}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{cur\_mode}{cur\_mode}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a558cd45937e7a92847353c66fee13c98} 
+void(\texorpdfstring{$\ast$}{*} cur\+\_\+mode) () (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+\Hypertarget{_auto_feeder_8ino_a617f9ad9ab6191ca6a0339a571e2faa2}\index{AutoFeeder.ino@{AutoFeeder.ino}!fk\_step@{fk\_step}}
+\index{fk\_step@{fk\_step}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{fk\_step}{fk\_step}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a617f9ad9ab6191ca6a0339a571e2faa2} 
+size\+\_\+t fk\+\_\+step = 0}
+
+\Hypertarget{_auto_feeder_8ino_a261a30951a01f17c5401357a0b2801f2}\index{AutoFeeder.ino@{AutoFeeder.ino}!fk\_target\_q1@{fk\_target\_q1}}
+\index{fk\_target\_q1@{fk\_target\_q1}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{fk\_target\_q1}{fk\_target\_q1}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a261a30951a01f17c5401357a0b2801f2} 
+float fk\+\_\+target\+\_\+q1 = 0}
+
+\Hypertarget{_auto_feeder_8ino_a895e7454f597aba7d9e9a00a54f3c28e}\index{AutoFeeder.ino@{AutoFeeder.ino}!fk\_target\_q2@{fk\_target\_q2}}
+\index{fk\_target\_q2@{fk\_target\_q2}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{fk\_target\_q2}{fk\_target\_q2}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a895e7454f597aba7d9e9a00a54f3c28e} 
+float fk\+\_\+target\+\_\+q2 = 0}
+
+\Hypertarget{_auto_feeder_8ino_aaeac97bfd2e932a93b72efddee0002c1}\index{AutoFeeder.ino@{AutoFeeder.ino}!ik\_step@{ik\_step}}
+\index{ik\_step@{ik\_step}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{ik\_step}{ik\_step}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_aaeac97bfd2e932a93b72efddee0002c1} 
+size\+\_\+t ik\+\_\+step = 0}
+
+\Hypertarget{_auto_feeder_8ino_a03cb91fbc726d9864c767964a3398ed1}\index{AutoFeeder.ino@{AutoFeeder.ino}!ik\_target\_x@{ik\_target\_x}}
+\index{ik\_target\_x@{ik\_target\_x}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{ik\_target\_x}{ik\_target\_x}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a03cb91fbc726d9864c767964a3398ed1} 
+float ik\+\_\+target\+\_\+x = \mbox{\hyperlink{_auto_feeder_8ino_a04a2000d1c2e217d4edb9812fbebb37f}{L1}} + \mbox{\hyperlink{_auto_feeder_8ino_ac922ced2094e330e1be36ddda8889937}{L2}}}
+
+\Hypertarget{_auto_feeder_8ino_a5344258704e541d479966ad9bf4e2211}\index{AutoFeeder.ino@{AutoFeeder.ino}!ik\_target\_y@{ik\_target\_y}}
+\index{ik\_target\_y@{ik\_target\_y}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{ik\_target\_y}{ik\_target\_y}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a5344258704e541d479966ad9bf4e2211} 
+float ik\+\_\+target\+\_\+y = 0}
+
+\Hypertarget{_auto_feeder_8ino_a5014205f00c8203e4fb2445385930fc4}\index{AutoFeeder.ino@{AutoFeeder.ino}!j1@{j1}}
+\index{j1@{j1}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{j1}{j1}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a5014205f00c8203e4fb2445385930fc4} 
+Servo j1}
+
+\Hypertarget{_auto_feeder_8ino_ace06684f1ceea7ac8092598f7e85b736}\index{AutoFeeder.ino@{AutoFeeder.ino}!j2@{j2}}
+\index{j2@{j2}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{j2}{j2}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_ace06684f1ceea7ac8092598f7e85b736} 
+Servo j2}
+
+\Hypertarget{_auto_feeder_8ino_a04a2000d1c2e217d4edb9812fbebb37f}\index{AutoFeeder.ino@{AutoFeeder.ino}!L1@{L1}}
+\index{L1@{L1}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{L1}{L1}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a04a2000d1c2e217d4edb9812fbebb37f} 
+const float L1 = 100.\+0}
+
+\Hypertarget{_auto_feeder_8ino_ac922ced2094e330e1be36ddda8889937}\index{AutoFeeder.ino@{AutoFeeder.ino}!L2@{L2}}
+\index{L2@{L2}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{L2}{L2}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_ac922ced2094e330e1be36ddda8889937} 
+const float L2 = 100.\+0}
+
+\Hypertarget{_auto_feeder_8ino_a61df98d240a4cf294c9456e6241eac68}\index{AutoFeeder.ino@{AutoFeeder.ino}!next\_mode@{next\_mode}}
+\index{next\_mode@{next\_mode}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{next\_mode}{next\_mode}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a61df98d240a4cf294c9456e6241eac68} 
+volatile void(\texorpdfstring{$\ast$}{*} next\+\_\+mode) () (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption}) = NULL}
+
+\Hypertarget{_auto_feeder_8ino_afdafdd56c00a3851656be918b3aa1dd0}\index{AutoFeeder.ino@{AutoFeeder.ino}!pre@{pre}}
+\index{pre@{pre}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{pre}{pre}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_afdafdd56c00a3851656be918b3aa1dd0} 
+bool pre = false}
+
+\Hypertarget{_auto_feeder_8ino_abea74ec9b1a826a0de96c8714ea31e48}\index{AutoFeeder.ino@{AutoFeeder.ino}!prev\_profile\_idx@{prev\_profile\_idx}}
+\index{prev\_profile\_idx@{prev\_profile\_idx}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{prev\_profile\_idx}{prev\_profile\_idx}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_abea74ec9b1a826a0de96c8714ea31e48} 
+uint8\+\_\+t prev\+\_\+profile\+\_\+idx = 0}
+
+\Hypertarget{_auto_feeder_8ino_affb50191e4f0bf8af2b7014aef24250a}\index{AutoFeeder.ino@{AutoFeeder.ino}!profile@{profile}}
+\index{profile@{profile}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{profile}{profile}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_affb50191e4f0bf8af2b7014aef24250a} 
+\mbox{\hyperlink{struct_profile}{Profile}} profile = \mbox{\hyperlink{_profile_8cpp_a060804bdb06901e79d27172a5837fc6a}{profiles}}\mbox{[}0\mbox{]}}
+
+\Hypertarget{_auto_feeder_8ino_a2a077f8518ecd673261e98d8f663723d}\index{AutoFeeder.ino@{AutoFeeder.ino}!profile\_idx@{profile\_idx}}
+\index{profile\_idx@{profile\_idx}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{profile\_idx}{profile\_idx}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a2a077f8518ecd673261e98d8f663723d} 
+int profile\+\_\+idx = 0}
+
+\Hypertarget{_auto_feeder_8ino_a209c65446ca302d32cbb908c4d75f616}\index{AutoFeeder.ino@{AutoFeeder.ino}!q1@{q1}}
+\index{q1@{q1}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{q1}{q1}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a209c65446ca302d32cbb908c4d75f616} 
+float q1 = 0}
+
+\Hypertarget{_auto_feeder_8ino_ab3d49c699125fd80f91106eafc9174fb}\index{AutoFeeder.ino@{AutoFeeder.ino}!q1\_speed@{q1\_speed}}
+\index{q1\_speed@{q1\_speed}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{q1\_speed}{q1\_speed}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_ab3d49c699125fd80f91106eafc9174fb} 
+float q1\+\_\+speed = 0}
+
+\Hypertarget{_auto_feeder_8ino_afddca3451c589f7b5928b6dccf8c88ba}\index{AutoFeeder.ino@{AutoFeeder.ino}!q2@{q2}}
+\index{q2@{q2}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{q2}{q2}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_afddca3451c589f7b5928b6dccf8c88ba} 
+float q2 = 0}
+
+\Hypertarget{_auto_feeder_8ino_ab0cedb5a32e8755558450dd3ea0982c0}\index{AutoFeeder.ino@{AutoFeeder.ino}!q2\_speed@{q2\_speed}}
+\index{q2\_speed@{q2\_speed}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{q2\_speed}{q2\_speed}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_ab0cedb5a32e8755558450dd3ea0982c0} 
+float q2\+\_\+speed = 0}
+
+\Hypertarget{_auto_feeder_8ino_acba7776dcc1861edfe0e9c5736de4df8}\index{AutoFeeder.ino@{AutoFeeder.ino}!timestamp@{timestamp}}
+\index{timestamp@{timestamp}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{timestamp}{timestamp}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_acba7776dcc1861edfe0e9c5736de4df8} 
+unsigned long timestamp}
+
+\Hypertarget{_auto_feeder_8ino_a954240e5977314fe6063fe54c4410839}\index{AutoFeeder.ino@{AutoFeeder.ino}!X\_CENTER@{X\_CENTER}}
+\index{X\_CENTER@{X\_CENTER}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{X\_CENTER}{X\_CENTER}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_a954240e5977314fe6063fe54c4410839} 
+uint16\+\_\+t X\+\_\+\+CENTER}
+
+\Hypertarget{_auto_feeder_8ino_aae6ddd65987ec2dc162bfaf6c8dcc992}\index{AutoFeeder.ino@{AutoFeeder.ino}!Y\_CENTER@{Y\_CENTER}}
+\index{Y\_CENTER@{Y\_CENTER}!AutoFeeder.ino@{AutoFeeder.ino}}
+\doxysubsubsection{\texorpdfstring{Y\_CENTER}{Y\_CENTER}}
+{\footnotesize\ttfamily \label{_auto_feeder_8ino_aae6ddd65987ec2dc162bfaf6c8dcc992} 
+uint16\+\_\+t Y\+\_\+\+CENTER}
+
