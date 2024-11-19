@@ -29,6 +29,9 @@ const float L2 = 100.0;
 // If servos are not moving from 0 to 180 degrees, then change these values
 #define SERVO_MIN_PW 544
 #define SERVO_MAX_PW 2400
+// Fine adjustment for servo alignment. These might need to be adjusted to make every install properly aligned.
+#define SERVO1_TRIM 60
+#define SERVO2_TRIM -80
 // Units in radians/step (timestep dependent on code performance)
 #define MAX_JOINT_SPEED 0.0003  // In radians per step
 #define DC_MOTOR_SPEED 255        // From 0-255, an analogWrite value
@@ -38,7 +41,7 @@ const float L2 = 100.0;
 #define THRESHOLD_CURRENT 400
 #define OVERLOAD_CURRENT 500
 // Battery voltage sensing
-#define LOW_POWER_VOLTAGE 562  // Calculated as half of 5.5 volts mapped from (0-5) -> (0-1023). If the voltage divider circuit measures below this value, then the device will shut off.
+#define LOW_POWER_VOLTAGE 900  // If supplied voltage drops below this value, then there is not enough power to drive the motors.
 // Minimum number of ms to press input until plate rotates.
 #define ROTATE_PLATE_TIME 500
 
@@ -325,7 +328,7 @@ int map_q_to_pulse_width(float q) {
 void write_q1(float in_q1) {
   // J1 from -PI to 0
   // j1.writeMicroseconds(map_q_to_pulse_width(in_q1 + PI * 0.5)); // Opposite sign
-  j1.writeMicroseconds(map_q_to_pulse_width(-in_q1 - PI * 0.5));
+  j1.writeMicroseconds(map_q_to_pulse_width(-in_q1 - PI * 0.5) + (SERVO1_TRIM));
   q1 = in_q1;
 }
 
@@ -336,7 +339,7 @@ void write_q1(float in_q1) {
 void write_q2(float in_q2) {
   // J2 from 0 to PI
   // j2.writeMicroseconds(map_q_to_pulse_width(in_q2 - PI * 0.5)); // Opposite sign
-  j2.writeMicroseconds(map_q_to_pulse_width(-in_q2 + PI * 0.5));
+  j2.writeMicroseconds(map_q_to_pulse_width(-in_q2 + PI * 0.5) + (SERVO2_TRIM));
   q2 = in_q2;
 }
 
