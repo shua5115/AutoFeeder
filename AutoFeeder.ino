@@ -41,7 +41,8 @@ const float L2 = 100.0;
 #define THRESHOLD_CURRENT 400
 #define OVERLOAD_CURRENT 500
 // Battery voltage sensing
-#define LOW_POWER_VOLTAGE 512  // If supplied voltage drops below this value, then there is not enough power to drive the motors.
+// If supplied voltage drops below this value, then there is not enough power to drive the motors.
+#define LOW_POWER_VOLTAGE 662 // ((7.4V * 0.875))/2) * 1023/5 = 662, 7.4V is battery voltage, 0.875 is voltage cutoff ratio, 1023/5 remaps from voltage to analogRead value.
 // Minimum number of ms to press input until plate rotates.
 #define ROTATE_PLATE_TIME 500
 
@@ -242,7 +243,7 @@ bool check_low_power() {
  * @see load_profile write_servos
  */
 void setup() {
-  // Serial.begin(9600);
+  Serial.begin(9600);
   pinMode(DEBUG_PIN, OUTPUT);                  // For oscilloscope debugging
   pinMode(INPUT_PIN, INPUT_PULLUP);            // Button input for scooping
   pinMode(JOYSTICK_BUTTON_PIN, INPUT_PULLUP);  // Used for calibration
@@ -302,7 +303,7 @@ void loop() {
       delay(25);
       digitalWrite(WARNING_LED_PIN, LOW);
     }
-    // Serial.println(analogRead(0));
+    Serial.println(analogRead(4));
   }
 }
 
