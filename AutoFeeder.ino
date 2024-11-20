@@ -33,13 +33,13 @@ const float L2 = 100.0;
 #define SERVO1_TRIM 0
 #define SERVO2_TRIM 0
 // Units in radians/step (timestep dependent on code performance)
-#define MAX_JOINT_SPEED 0.0003  // In radians per step
+#define MAX_JOINT_SPEED 0.0003    // In radians per step
 #define DC_MOTOR_SPEED 255        // From 0-255, an analogWrite value
 // Units in mm/step
 #define IK_STEP_SIZE 0.25
 // Current sensing
-#define THRESHOLD_CURRENT 400
-#define OVERLOAD_CURRENT 500
+#define THRESHOLD_CURRENT 340
+#define OVERLOAD_CURRENT 400
 // Battery voltage sensing
 #define LOW_POWER_VOLTAGE 900  // If supplied voltage drops below this value, then there is not enough power to drive the motors.
 // Minimum number of ms to press input until plate rotates.
@@ -242,6 +242,7 @@ bool check_low_power() {
  * @see load_profile write_servos
  */
 void setup() {
+  // Serial.begin(9600);
   pinMode(DEBUG_PIN, OUTPUT);                  // For oscilloscope debugging
   pinMode(INPUT_PIN, INPUT_PULLUP);            // Button input for scooping
   pinMode(JOYSTICK_BUTTON_PIN, INPUT_PULLUP);  // Used for calibration
@@ -301,6 +302,7 @@ void loop() {
       delay(25);
       digitalWrite(WARNING_LED_PIN, LOW);
     }
+    // Serial.println(analogRead(0));
   }
 }
 
