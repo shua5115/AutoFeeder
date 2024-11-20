@@ -38,10 +38,10 @@ const float L2 = 100.0;
 // Units in mm/step
 #define IK_STEP_SIZE 0.25
 // Current sensing
-#define THRESHOLD_CURRENT 340
-#define OVERLOAD_CURRENT 400
+#define THRESHOLD_CURRENT 400
+#define OVERLOAD_CURRENT 500
 // Battery voltage sensing
-#define LOW_POWER_VOLTAGE 900  // If supplied voltage drops below this value, then there is not enough power to drive the motors.
+#define LOW_POWER_VOLTAGE 512  // If supplied voltage drops below this value, then there is not enough power to drive the motors.
 // Minimum number of ms to press input until plate rotates.
 #define ROTATE_PLATE_TIME 500
 
