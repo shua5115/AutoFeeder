@@ -29,9 +29,9 @@ const float L2 = 100.0;
 // If servos are not moving from 0 to 180 degrees, then change these values
 #define SERVO_MIN_PW 544
 #define SERVO_MAX_PW 2400
-// Fine adjustment for servo alignment. These might need to be adjusted to make every install properly aligned.
-#define SERVO1_TRIM 60
-#define SERVO2_TRIM -80
+// Fine adjustment for servo alignment. These might need to be adjusted if servos are severely misaligned.
+#define SERVO1_TRIM 0
+#define SERVO2_TRIM 0
 // Units in radians/step (timestep dependent on code performance)
 #define MAX_JOINT_SPEED 0.0003  // In radians per step
 #define DC_MOTOR_SPEED 255        // From 0-255, an analogWrite value
