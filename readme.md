@@ -34,6 +34,8 @@ to work with almost any circular plate or bowl. It can store multiple bowl/plate
 
 Doxygen for documentation. (https://www.doxygen.nl/manual/)
 
+(You just need to install Doxygen and run `doxygen Doxyfile` to generate docs.)
+
 ---
 
 <sub>University of Maryland - A. James Clark School of Engineering</sub>
