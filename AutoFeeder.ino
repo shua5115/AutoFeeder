@@ -10,48 +10,48 @@
 #include "Joystick.h"
 
 // Digital Pins
-#define INPUT_PIN 2
-#define DEBUG_PIN 4
-#define SERVO_POWER_PWM 3
-#define SERVO_POWER_DIR 12
-#define WARNING_LED_PIN 10
+#define INPUT_PIN 2 /** Pin for mono jack button, using pull-up resistor. */
+#define DEBUG_PIN 4 /** Output pin used for debugging */
+#define SERVO_POWER_PWM 3 /** Output pin for servo power */
+#define SERVO_POWER_DIR 12 /** Output pin to set servo direction. HIGH -> +5V, LOW -> -5V */
+#define WARNING_LED_PIN 10 /** Output pin for LED. */
 // Analog Pins
-#define PROFILE_POT_PIN 5
-#define SERVO_VOLTAGE_PIN 4
+#define PROFILE_POT_PIN 5 /** Analog input pin for potentiometer */
+#define SERVO_VOLTAGE_PIN 4 /** Analog input pin for voltage divider */
 
 // Lengths of linkages, in mm
-const float L1 = 100.0;
-const float L2 = 100.0;
+const float L1 = 100.0; /** Length of linkage 1 in mm */
+const float L2 = 100.0; /** Distance to tip of the spoon in mm */
 
 // Constants
-#define Q_EPSILON 0.00001   // Two angles are considered equal if their absolute difference is less than this value
-#define DIST_EPSILON 0.001  // Two points are considered at the same position if they are this close
+#define Q_EPSILON 0.00001 /** Two angles are considered equal if their absolute difference is less than this value */
+#define DIST_EPSILON 0.001 /** Two points are considered at the same position if they are this close */
 // If servos are not moving from 0 to 180 degrees, then change these values
-#define SERVO_MIN_PW 544
-#define SERVO_MAX_PW 2400
+#define SERVO_MIN_PW 544 /** Minimum pulse width for servos in microseconds */
+#define SERVO_MAX_PW 2400 /** Maximum pulse width for servos in microseconds */
 // Fine adjustment for servo alignment. These might need to be adjusted if servos are severely misaligned.
 #define SERVO1_TRIM 0
 #define SERVO2_TRIM 0
-// Units in radians/step (timestep dependent on code performance)
-#define MAX_JOINT_SPEED 0.0003    // In radians per step
-#define DC_MOTOR_SPEED 255        // From 0-255, an analogWrite value
-// Units in mm/step
-#define IK_STEP_SIZE 0.25
-// Current sensing
-#define THRESHOLD_CURRENT 400
-#define OVERLOAD_CURRENT 500
+
+#define MAX_JOINT_SPEED 0.0003 /** Max speed of servos in radians per step. Step duration is depenent on code performance. */
+#define DC_MOTOR_SPEED 255 /** Speed of the DC motor, from 0-255. */
+
+#define IK_STEP_SIZE 0.25 /** Distance stepped by each IK step during scoop, in mm */
+// Current sensing, at 1.65 V / A, or 337.6 units / A from analogRead
+#define THRESHOLD_CURRENT 400 /** If servo current draw exceeds this value, then scooping will restart with a vertical offset. */
+#define OVERLOAD_CURRENT 500 /** If servo current draw exceeds this value, then scooping will cancel. */
 // Battery voltage sensing
 // If supplied voltage drops below this value, then there is not enough power to drive the motors.
 #define LOW_POWER_VOLTAGE 662 // ((7.4V * 0.875))/2) * 1023/5 = 662, 7.4V is battery voltage, 0.875 is voltage cutoff ratio, 1023/5 remaps from voltage to analogRead value.
-// Minimum number of ms to press input until plate rotates.
-#define ROTATE_PLATE_TIME 500
+
+#define ROTATE_PLATE_TIME 500 /** Minimum number of ms to hold input down until plate rotates. */
 
 // GLOBAL VARIABLES
 Profile profile = profiles[0];  // Stores the keypoints of the currently selected profile
 int profile_idx = 0;            // Stores the index of the selected profile in the list of profiles
 unsigned long timestamp;        // Used for various timing-based events
 Servo j1, j2;                   // Servo joints
-uint16_t X_CENTER, Y_CENTER;
+uint16_t X_CENTER, Y_CENTER;    // Joystick calibration
 float q1 = 0;                   // current q1 position
 float q2 = 0;                   // current q2 position
 float q1_speed = 0;             // current q1 speed
@@ -67,10 +67,10 @@ uint8_t prev_profile_idx = 0;   // keeps track of the previous profile index to 
 #pragma region Step Code
 /**
  * @brief Steps from current ik target towards the target position by a given step length.
- * @param x_target Target for x-coordinate.
- * @param y_target Target for y-coordinate.
+ * @param x_target Target for x-coordinate
+ * @param y_target Target for y-coordinate
  * @param step_length The incremental step length to get to ik target.
- * @returns 1 if finished, 0 otherwise.
+ * @returns 1 if target is reached in this step, 0 otherwise.
  */
 int step_ik_target(float x_target, float y_target, float step_length) {
   float x_delta, y_delta;
@@ -96,12 +96,12 @@ int step_ik_target(float x_target, float y_target, float step_length) {
 }
 
 /**
- * @brief Moves joint positions from current positions to target positions.
+ * @brief Moves joint targets from current positions to target positions.
  * @param q1_target Target for joint q1.
  * @param q2_target Target for joint q2.
- * @param q1_max_step Max for q1.
- * @param q2_max_step Max for q2.
- * @returns 1 if finished, 0 otherwise.
+ * @param q1_max_step Max step for q1.
+ * @param q2_max_step Max step for q2.
+ * @returns 1 if target is reached in this step, 0 otherwise.
  */
 int step_joint_positions(float q1_target, float q2_target, float q1_max_step, float q2_max_step) {
   // Step q1 towards q1_target by q1_max_step, and the same for q2. Both do not exceed target values.
@@ -146,12 +146,13 @@ int step_joint_positions(float q1_target, float q2_target, float q1_max_step, fl
 }
 
 /**
- * @brief Finds speeds at which both q1 and q2 will reach their target at the same time.
+ * @brief Finds speeds for which joints 1 and 2 will reach their targets at the same time.
+ * @note If target is very close to current position, speeds will be set to maximum to avoid dividing by zero.
  * @param q1_target Target for q1.
  * @param q2_target Target for q2.
- * @param max_speed Maximum speed of movement.
- * @param q1_speed Reference to q1 speed, which will be set.
- * @param q2_speed Reference to q2_speed, which will be set.
+ * @param max_speed Maximum speed of rotation.
+ * @param q1_speed Reference to q1_speed, which will be set by this function.
+ * @param q2_speed Reference to q2_speed, which will be set by this function.
  */
 void balance_speed(float q1_target, float q2_target, float max_speed, float &q1_speed, float &q2_speed) {
   // Finds speeds at which both q1 and q2 will reach their target at the same time.
@@ -198,6 +199,7 @@ bool pre = false;                     // True if the mode is just entered
 
 /**
  * @brief Schedules to switch to the next mode, only if another section of code has not yet requested to switch.
+ * @param new_mode Mode function to execute in loop
  */
 void switch_mode(void (*new_mode)()) {
   if (next_mode == NULL) {
@@ -206,6 +208,7 @@ void switch_mode(void (*new_mode)()) {
 }
 /**
  * @brief Switches the mode regardless of whether another has already requested a switch (useful for emergency stop).
+ * @param new_mode Mode function to execute in loop
  */
 void force_switch_mode(void (*new_mode)()) {
   next_mode = new_mode;
@@ -228,6 +231,7 @@ void return_step();        // Moves arm back to starting position, then switches
 /**
  * @brief If the SERVO_VOLTAGE_PIN is under LOW_POWER_VOLTAGE then set to lower power mode.
  * @see switch_mode
+ * @return true if switching to low power, false otherwise.
  */
 bool check_low_power() {
   int val = analogRead(SERVO_VOLTAGE_PIN);
@@ -243,7 +247,7 @@ bool check_low_power() {
  * @see load_profile write_servos
  */
 void setup() {
-  Serial.begin(9600);
+  // Serial.begin(9600);
   pinMode(DEBUG_PIN, OUTPUT);                  // For oscilloscope debugging
   pinMode(INPUT_PIN, INPUT_PULLUP);            // Button input for scooping
   pinMode(JOYSTICK_BUTTON_PIN, INPUT_PULLUP);  // Used for calibration
@@ -265,26 +269,29 @@ void setup() {
   for (int i = 0; i < NUM_PROFILES; i++) {
     load_profile(i, profiles[i]);
   }
-  profile = profiles[check_profile_choice()];
+  // Set profile to current selection
+  prev_profile_idx = check_profile_choice();
+  profile = profiles[prev_profile_idx];
   // When the servos turn on, they snap to their start position at full speed
   // So, this position is one that is unlikely to hit an obstacle.
   write_servos(-2.09, 2.09);            // This is -120 and 120 degrees, making an equilateral triangle.
-  digitalWrite(SERVO_POWER_PWM, HIGH);  // Enable servos after setting targets to ensure servos recieve signal immediately
+  digitalWrite(SERVO_POWER_PWM, HIGH);  // Enable servos after setting targets to ensure servos recieve signal before getting power to move
   timestamp = millis();
-  // Give servos time to reach their target before starting the state machine
+  // Give servos time to reach their target before starting the main loop
   while (millis() < timestamp + 500) {
     if (check_low_power()) {
       break;
     }
   }
-  // Setup joystick center
+  // Setup joystick center after servos receive power to ensure electrical noise matches regular operating conditions
   X_CENTER = analogRead(JOY_X_PIN);
   Y_CENTER = analogRead(JOY_Y_PIN);
 }
 
 /**
- * @brief Arduino main loop, which manages modes.
+ * @brief Arduino main loop, which executes the current mode function.
  * @see check_profile_choice
+ * @see switch_mode
  */
 void loop() {
   if (next_mode != NULL) {
@@ -303,7 +310,7 @@ void loop() {
       delay(25);
       digitalWrite(WARNING_LED_PIN, LOW);
     }
-    Serial.println(analogRead(4));
+    // Serial.println(analogRead(4));
   }
 }
 
