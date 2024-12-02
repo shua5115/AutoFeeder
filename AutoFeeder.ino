@@ -198,8 +198,9 @@ volatile void (*next_mode)() = NULL;  // Allows interrupts to change the mode (v
 bool pre = false;                     // True if the mode is just entered
 
 /**
- * @brief Schedules to switch to the next mode, only if another section of code has not yet requested to switch.
- * @param new_mode Mode function to execute in loop
+ * Switch to the new mode only if another section of code has not yet requested to switch during this loop.
+ * Useful for regular-priority mode switching, as compared to an emergency-priority switch.
+ * @param new_mode Mode function to execute in main loop
  */
 void switch_mode(void (*new_mode)()) {
   if (next_mode == NULL) {
@@ -207,14 +208,15 @@ void switch_mode(void (*new_mode)()) {
   }
 }
 /**
- * @brief Switches the mode regardless of whether another has already requested a switch (useful for emergency stop).
- * @param new_mode Mode function to execute in loop
+ * Switches the mode regardless of whether another has already requested a switch (useful for emergency stop).
+ * @param new_mode Mode function to execute in main loop
  */
 void force_switch_mode(void (*new_mode)()) {
   next_mode = new_mode;
 }
 
-// Pre-define modes for later implementation
+// MODES
+
 void move_home_then_wait();  // Moves the servos back to the home position, then switches to wait_mode.
 void wait_mode();            // Waits for user input, then goes into the rotate plate step or calibration mode depending on the input.
 void calibration_mode();     // Sets keypoints for differently shaped plates and bowls
@@ -228,8 +230,9 @@ void feed_wait_step();     // Waits for user to eat the food. Switches to return
 void return_step();        // Moves arm back to starting position, then switches to wait mode.
 
 // CODE
+
 /**
- * @brief If the SERVO_VOLTAGE_PIN is under LOW_POWER_VOLTAGE then set to lower power mode.
+ * Enters low power mode if the voltage measured at SERVO_VOLTAGE_PIN is below LOW_POWER_VOLTAGE.
  * @see switch_mode
  * @return true if switching to low power, false otherwise.
  */
@@ -243,7 +246,7 @@ bool check_low_power() {
 }
 
 /**
- * @brief Initial setup for the device.
+ * Initial setup for the device, including setting pin modes, loading profiles, and calibrating the joystick.
  * @see load_profile write_servos
  */
 void setup() {
@@ -289,7 +292,8 @@ void setup() {
 }
 
 /**
- * @brief Arduino main loop, which executes the current mode function.
+ * Arduino main loop, which executes the current mode function on repeat.
+ * Also checks for switching profiles.
  * @see check_profile_choice
  * @see switch_mode
  */
@@ -316,7 +320,7 @@ void loop() {
 
 #pragma region Servo Control
 /**
- * @brief Linearly interpolates from (-pi/2 pi/2) -> (SERVO_MIN_PW SERVO_MAX_PW)
+ * Linearly interpolates from (-pi/2 pi/2) -> (SERVO_MIN_PW SERVO_MAX_PW)
  * @param q
  */
 int map_q_to_pulse_width(float q) {
@@ -332,27 +336,31 @@ int map_q_to_pulse_width(float q) {
 }
 
 /**
- * @brief 
- * @param in_q1
+ * Writes the joint angle to the j1 servo, and to the global variable q1 to keep track of the motor's current position.
+ * @param in_q1 The joint angle to write, in radians. Angle should be in range -PI to 0.
  */
 void write_q1(float in_q1) {
   // J1 from -PI to 0
-  // j1.writeMicroseconds(map_q_to_pulse_width(in_q1 + PI * 0.5)); // Opposite sign
   j1.writeMicroseconds(map_q_to_pulse_width(-in_q1 - PI * 0.5) + (SERVO1_TRIM));
   q1 = in_q1;
 }
 
 /**
- * @brief 
- * @param in_q2
+ * Writes the joint angle to the j2 servo, and to the global variable q2 to keep track of the motor's current position.
+ * @param in_q2 The joint angle to write, in radians. Angle should be in range 0 to PI.
  */
 void write_q2(float in_q2) {
   // J2 from 0 to PI
-  // j2.writeMicroseconds(map_q_to_pulse_width(in_q2 - PI * 0.5)); // Opposite sign
   j2.writeMicroseconds(map_q_to_pulse_width(-in_q2 + PI * 0.5) + (SERVO2_TRIM));
   q2 = in_q2;
 }
 
+/**
+ * Writes to both servo 1 and 2 in one function call.
+ * @param in_q1 Servo 1 angle, in range -PI to 0 radians
+ * @param in_q2 Servo 2 angle, in range 0 to PI radians
+ * @see write_q1 write_q2
+ */
 void write_servos(float in_q1, float in_q2) {
   write_q1(in_q1);
   write_q2(in_q2);
@@ -360,8 +368,8 @@ void write_servos(float in_q1, float in_q2) {
 #pragma endregion
 
 /**
- * @brief Returns a profile index depending on the current potentiometer value.
- * @returns A profile index.
+ * Checks profile potentiometer for the user's current selection. Returns a profile index depending on the measured voltage.
+ * @returns A profile index in range 0 to 3
  */
 int check_profile_choice() {
   // Average difference between division centers: 146
@@ -374,8 +382,8 @@ int check_profile_choice() {
 }
 
 /**
- * @brief Moves the servos back to the home position, then switches to wait_mode.
- * @see step_ik_target write_servos switch_mode step_joint_positions check_low_power
+ * Moves the servos back to the home position using inverse kinematics, then switches to wait_mode.
+ * @see wait_mode
  */
 void move_home_then_wait() {
   if (pre) {
@@ -398,7 +406,9 @@ void move_home_then_wait() {
 }
 
 /**
- * @brief Rotates the plate at a slow speed. On user input, stop the plate and switch to descend step.
+ * Waits for user input. If input is momentary, then switch to descend_step. If input is held for more than ROTATE_PLATE_TIME, then switch to rotate_plate_mode.
+ * If input is pressing the joystick, a momentary press will switch to descend_step. If joystick is held for more than 1 second, then switch to calibration_mode. If joystick is held for more than 10 seconds, then reset profiles.
+ * @see descend_step rotate_plate_step calibration_mode reset_profiles
  */
 void wait_mode() {
   // Input pin is pullup, so negative logic (pressed = LOW)
@@ -447,7 +457,7 @@ void wait_mode() {
 }
 
 /**
- * @brief Lower power mode for the device, which slows down the motors and displays an led warning.
+ * Lower power mode for the device, which cuts off power to the motors and blinks the led.
  */
 void low_power_mode() {
   if (pre) {
@@ -461,7 +471,8 @@ void low_power_mode() {
 }
 
 /**
- * @brief Rotates the platform while input is pressed.
+ * Rotates the platform while input is pressed. On input release, switches to wait_mode
+ * @see wait_mode
  */
 void rotate_plate_step() {
   if (pre) {
@@ -482,7 +493,8 @@ void rotate_plate_step() {
 }
 
 /**
- * @brief Descends to edge of plate. Once motion is complete, switch to scoop step.
+ * Moves end effector to the entry point of the profile. Once motion is complete, switch to scoop step.
+ * @see scoop_step
  */
 void descend_step() {
   if (pre) {
@@ -502,14 +514,16 @@ void descend_step() {
 }
 
 /**
- * @brief Scrapes across plate. Once motion is complete, switch to pre lift step.
+ * Scrapes across plate by visiting all profile points. Once motion is complete, switch to lift_step_fk.
+ * If motor current measurement is greater than OVERLOAD_CURRENT, then switch to mode move_home_then_wait.
+ * @see lift_step_fk move_home_then_wait
  */
 void scoop_step() {
   static float y_off;
   if (pre) {
-    y_off = 0;
-    ik_step = 1;
-    fk_step = 0;
+    y_off = 0; // y offset
+    ik_step = 1; // which profile point to go towards (1-3)
+    fk_step = 0; // 0 if fk move is done
     timestamp = millis();
   }
   if (fk_step == 0) {
@@ -546,7 +560,10 @@ void scoop_step() {
 }
 
 /**
- * @brief Lifts spoon up to user with forward kinematics (sets joint states directly)
+ * Lifts spoon up to user with forward kinematics (sets joint states directly).
+ * When destination is reached, switches to feed_wait_step.
+ * If measured current for the servos exceeds OVERLOAD_CURRENT, then switch to return_step.
+ * @see feed_wait_step return_step
  */
 void lift_step_fk() {
   if (pre) {
@@ -557,7 +574,7 @@ void lift_step_fk() {
     balance_speed(fk_target_q1, fk_target_q2, MAX_JOINT_SPEED * 0.75, q1_speed, q2_speed);
   }
   int current = analogRead(0);
-  if (current > THRESHOLD_CURRENT) {
+  if (current > OVERLOAD_CURRENT) {
     switch_mode(return_step);
   }
 
@@ -569,7 +586,8 @@ void lift_step_fk() {
 }
 
 /**
- * @brief Waits for user to eat the food. Switches to return step on user input.
+ * Waits for user to eat the food. Switches to return step on user input.
+ * @see return_step
  */
 void feed_wait_step() {
   if (digitalRead(INPUT_PIN) == LOW || read_joystick_button()) {
@@ -579,7 +597,9 @@ void feed_wait_step() {
 }
 
 /**
- * @brief Moves arm back to starting position, then switches to wait mode.
+ * Moves arm back to starting position, then switches to wait mode.
+ * If the starting position is invalid, then resets profiles. This allows loading profiles on first boot or fixing EEPROM corruption.
+ * @see wait_mode
  */
 void return_step() {
   if (pre) {
@@ -605,7 +625,9 @@ void return_step() {
 }
 
 /**
- * @brief Calculates scooping up motion for the arm if scoop is cancelled.
+ * Interrupts the default scooping motion, then moves the end effector directly upwards.
+ * Switches to cancel_scoop_out_step to finish the scoop motion.
+ * @see cancel_scoop_out_step
  */
 void cancel_scoop_up_step() {
   if (pre) {
@@ -633,7 +655,8 @@ void cancel_scoop_up_step() {
 }
 
 /**
- * @brief Calculates scooping out motion for the arm if scoop is cancelled.
+ * Moves end effector directly forwards to the final profile point, then switches to lift_step_fk.
+ * @see lift_step_fk
  */
 void cancel_scoop_out_step() {
   if (pre) {
@@ -661,9 +684,9 @@ void cancel_scoop_out_step() {
 }
 
 /**
- * @brief Arm makes a nodding motion, used when a profile point is set during calibration mode.
+ * Arm makes a nodding motion, used when a profile point is set during calibration mode.
  */
-void head_nod() {
+static void head_nod() {
   float og_q1 = q1;
   float og_q2 = q2;
   while (!step_joint_positions(og_q1, og_q2 + 0.25, MAX_JOINT_SPEED * 0.5, MAX_JOINT_SPEED * 0.5)) {
@@ -677,7 +700,9 @@ void head_nod() {
 }
 
 /**
- * @brief Calibration mode for the device, allows users to set keypoints for differently shaped plates and bowls.
+ * Calibration mode for the device, allows users to set keypoints for differently shaped plates and bowls.
+ * Click the joystick button to set a profile point, or hold the joystick button down to cancel calibration.
+ * @see constrain_ik_point save_profile
  */
 void calibration_mode() {
   static uint8_t calibration_step = 0;

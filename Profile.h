@@ -15,32 +15,32 @@ typedef struct Profile {
 extern Profile profiles[4];
 
 /**
- * @brief Resets all profiles
+ * @brief Resets all profiles and saves to EEPROM.
  */
 void reset_profiles();
 
 /**
  * @brief Saves a profile to an index in EEPROM. Returns if the save was successful.
- * @param p Pointer to
- * @param idx Pointer to
+ * @param p Profile to save
+ * @param idx Profile index to overwrite in EEPROM
+ * @return True if successful
  */
 bool save_profile(const Profile &p, uint8_t idx);
 
 /**
  * @brief Loads a profile from a specified index in EEPROM.
- * @param idx
- * @param p Pointer to
- * @returns True if the load was successful.
+ * @param idx Profile index in EEPROM
+ * @param p Pointer to Profile struct to initialize.
+ * @return True if the load was successful.
  */
 bool load_profile(uint8_t idx, Profile &p);
 
 /**
- * @brief Checks if a profile contains valid start and end positions.
- * @param p Pointer to
- * @param step
- * @param x_addr Pointer to
- * @param y_addr Pointer to
- * @returns True if the profile step exists, otherwise False.
+ * @param p Profile to read
+ * @param step Index of step
+ * @param x_addr x value to initialize
+ * @param y_addr y value to initialize
+ * @returns True if the profile step exists. If true, x_addr and y_addr are written, if false they are left unmodified from their original values.
  */
 bool get_profile_step(const Profile &p, int step, float &x_addr, float &y_addr);
 
